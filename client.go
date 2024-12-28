@@ -2,54 +2,72 @@ package main
 
 import (
 	"errors"
+	"io"
 	"log/slog"
+	"math/rand"
 	"sync"
+	"sync/atomic"
 
 	"golang.org/x/net/websocket"
 )
 
 var ErrClientIsClosed = errors.New("client is closed")
 
+// Client maintains a websocket connection and provides basic operations
+// for reading and writing data.
 type Client struct {
+	id         int // Is used to identify client during debugging
 	connection *websocket.Conn
 	out        chan []byte
 	in         chan []byte
-	isClosed   bool
+	isClosed   int32 // Use atomic for thread-safety
 	onClose    func()
 	wg         sync.WaitGroup
 }
 
 func NewClient(conn *websocket.Conn) *Client {
 	client := &Client{
+		id:         rand.Intn(1e5),
 		connection: conn,
-		out:        make(chan []byte),
-		in:         make(chan []byte),
+		out:        make(chan []byte, 100),
+		in:         make(chan []byte, 100),
 		onClose:    func() {},
 	}
 	client.start()
 	return client
 }
 
+func (c *Client) Id() int {
+	return c.id
+}
+
+// Wait blocks until all read and write goroutines for the client
+// have finished, indicating that the conenction is closed.
 func (c *Client) Wait() {
 	c.wg.Wait()
 }
 
+// Send pushes the given slice of bytes into the output channel.
+// Blocks if the output channel buffer is full.
 func (c *Client) Send(data []byte) error {
-	if c.isClosed {
+	if atomic.LoadInt32(&c.isClosed) == 1 {
 		return ErrClientIsClosed
 	}
 	c.out <- data
 	return nil
 }
 
+// Receive retrives the slive of bytes from the input channel.
+// Blocks if there is no data available.
 func (c *Client) Receive() ([]byte, error) {
-	if c.isClosed {
+	if atomic.LoadInt32(&c.isClosed) == 1 {
 		return nil, ErrClientIsClosed
 	}
-	data := <-c.in
-	return data, nil
+	return <-c.in, nil
 }
 
+// SetOnClose assigns a callback function to be executed after
+// the connection is closed.
 func (c *Client) SetOnClose(onClose func()) {
 	if onClose != nil {
 		c.onClose = onClose
@@ -61,6 +79,10 @@ func (c *Client) readMessages() {
 		close(c.in)
 		c.close()
 	}()
+
+	// WebSocket conenction limit each read operation to 4088 bytes.
+	// Longer messages, the algorithm appends subsequent reads to a buffer
+	// until the entrie message is received.
 	bufSize := 4088
 	buf := make([]byte, bufSize)
 outer:
@@ -70,7 +92,9 @@ outer:
 		for hasNext {
 			n, err := c.connection.Read(buf)
 			if err != nil {
-				slog.Error("Connection Read Error: ", "error", err)
+				if err != io.EOF {
+					slog.Error("Client read:", "client-id", c.id, "error", err)
+				}
 				break outer
 			}
 			data = append(data, buf[:n]...)
@@ -80,15 +104,17 @@ outer:
 	}
 }
 
+// writeMessages reads data from the output channel and writes it
+// to the WebSocket connection. Terminates on write errors or channel closure.
 func (c *Client) writeMessages() {
 	defer func() {
 		close(c.out)
 		c.close()
 	}()
+
 	for data := range c.out {
-		_, err := c.connection.Write(data)
-		if err != nil {
-			slog.Error("Connection Write Error: ", "error", err)
+		if _, err := c.connection.Write(data); err != nil {
+			slog.Error("Client write:", "client-id", c.id, "error", err)
 			break
 		}
 	}
@@ -104,12 +130,15 @@ func (c *Client) start() {
 		defer c.wg.Done()
 		c.writeMessages()
 	}()
-	slog.Debug("Client starts")
+	slog.Debug("Client started", "client-id", c.id)
 }
 
+// close safely closes WebSocket connection, invokes the onClose callback,
+// and marks the client as closed using an atomic operation.
 func (c *Client) close() {
-	slog.Debug("Client: close")
-	c.connection.Close()
-	c.isClosed = true
-	c.onClose()
+	if atomic.CompareAndSwapInt32(&c.isClosed, 0, 1) {
+		_ = c.connection.Close()
+		c.onClose()
+		slog.Debug("Client closed", "client-id", c.id)
+	}
 }

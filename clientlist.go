@@ -1,12 +1,17 @@
 package main
 
 import (
+	"sort"
 	"sync"
 )
 
+// ClientList maintains a thread-safe list of clients with unique counters
+// for tracking and ordering.
 type ClientList struct {
 	clients map[*Client]uint8
 	mutex   sync.RWMutex
+	// Counter uses uint8 to limit the maximum number of client to 255,
+	// assuming this is sufficient.
 	counter uint8
 }
 
@@ -29,58 +34,30 @@ func (cl *ClientList) RemoveClient(client *Client) {
 	defer cl.mutex.Unlock()
 
 	if _, ok := cl.clients[client]; ok {
-		_ = client.connection.Close() //Ignore error
+		// Ensure the connection is closed before removing the client,
+		// even if it is likely already closed.
+		_ = client.connection.Close()
 		delete(cl.clients, client)
 	}
 }
 
-func (cl *ClientList) FindFirst(n uint8) []*Client {
+// Retrives the first `n` clients based on their counter value (in ascending order).
+// If the number of available clients is less than `n`, it returns all of them.
+func (cl *ClientList) FindFirst(n int) []*Client {
 	cl.mutex.RLock()
 	defer cl.mutex.RUnlock()
 
-	ents := entries(make([]*entry, n))
-	for k, v := range cl.clients {
-		ent := entry{key: k, value: v}
-		ents.setIfMin(&ent)
-	}
-	return ents.get()
-}
-
-type entry struct {
-	key   *Client
-	value uint8
-}
-
-type entries []*entry
-
-func (ents entries) setIfMin(ent *entry) {
-	for i, e := range ents {
-		if e == nil {
-			ents[i] = ent
-			return
-		}
+	var sortedClients []*Client
+	for client := range cl.clients {
+		sortedClients = append(sortedClients, client)
 	}
 
-	minI := 0
-	minVal := uint8(2<<7 - 1)
-	for i, e := range ents {
-		if e.value < minVal {
-			minVal = e.value
-			minI = i
-		}
-	}
+	sort.Slice(sortedClients, func(i, j int) bool {
+		return cl.clients[sortedClients[i]] < cl.clients[sortedClients[j]]
+	})
 
-	if ent.value < minVal {
-		ents[minI] = ent
+	if len(sortedClients) > n {
+		sortedClients = sortedClients[:n]
 	}
-}
-
-func (ents entries) get() []*Client {
-	clients := make([]*Client, len(ents))
-	for i, e := range ents {
-		if e != nil {
-			clients[i] = e.key
-		}
-	}
-	return clients
+	return sortedClients
 }

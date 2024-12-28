@@ -2,17 +2,16 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"log/slog"
+	"math/rand"
 )
-
-var ErrTooManyClients = errors.New("too many clients")
 
 type message struct {
 	MessageType string `json:"type"`
 	Data        string `json:"data"`
 }
 
+// Messages are used to inform clients about the state of Peer Connection.
 var (
 	RequestOfferMessage = message{MessageType: "request-offer"}
 	WaitForPeerMessage  = message{
@@ -23,7 +22,9 @@ var (
 	}
 )
 
+// PeerConnection establishes and manages peer-to-peer connection between two clients.
 type PeerConnection struct {
+	id       int // Is used to identify PeerConnection during debugging.
 	clients  *ClientList
 	sender   *Client
 	receiver *Client
@@ -31,15 +32,18 @@ type PeerConnection struct {
 
 func NewPeerConnection() *PeerConnection {
 	return &PeerConnection{
+		id:      rand.Intn(1e5),
 		clients: NewClientList(),
 	}
 }
 
+func (c *PeerConnection) Id() int {
+	return c.id
+}
+
+// AddClient adds a new client to the peer connection.
+// If two clients are available, it starts the signaling process.
 func (c *PeerConnection) AddClient(client *Client) {
-	slog.Debug("PeerConnection: add client", "client", client)
-
-	c.clients.AddClient(client)
-
 	client.SetOnClose(func() {
 		c.clients.RemoveClient(client)
 		if c.sender == client || c.receiver == client {
@@ -50,88 +54,71 @@ func (c *PeerConnection) AddClient(client *Client) {
 				c.receiver = nil
 			}
 			if err := c.signal(); err != nil {
-				slog.Error("Signaling On Client Close:", "error", err)
+				slog.Error("Signaling on client close", "peer-connection", c.Id(),
+					"client", client.Id(), "error", err)
 			}
 		}
 	})
+	c.clients.AddClient(client)
+	slog.Debug("PeerConnection added client", "peer-coonnection", c.Id(),
+		"client", client.Id())
 
 	if c.sender == nil || c.receiver == nil {
 		if err := c.signal(); err != nil {
-			slog.Error("Signaling Error:", "error", err)
+			slog.Error("Signaling on client add", "peer-connection", c.Id(),
+				"client", client.Id(), "error", err)
 
-			message, err := json.Marshal(message{MessageType: "error", Data: err.Error()})
-			raisePanic(err) // Remove in production
-
+			message, _ := json.Marshal(message{MessageType: "error", Data: err.Error()})
 			_ = client.Send(message)
 		}
 	} else {
-		message, err := json.Marshal(WaitForRoomMessage)
-		raisePanic(err) // Remove in production
-
+		message, _ := json.Marshal(WaitForRoomMessage)
 		if err := client.Send(message); err != nil {
-			slog.Error("Adding Client Error:", "error", err)
+			slog.Error("Sending client message", "peer-connection", c.Id(),
+				"client", client.Id(), "error", err)
 		}
 	}
 }
 
+// signal manages the signaling process to establish a peer connection.
 func (c *PeerConnection) signal() error {
-	firstClients := c.clients.FindFirst(2)
-	c.sender = firstClients[0]
-	c.receiver = firstClients[1]
-	slog.Debug("", "clients", len(c.clients.clients))
-	slog.Debug("", "sender", c.sender, "receiver", c.receiver)
-
-	if c.sender == nil || c.receiver == nil {
-		message, err := json.Marshal(WaitForPeerMessage)
-		raisePanic(err) // Remove in production
-		if c.sender != nil {
-			c.sender.Send(message)
-		}
-		if c.receiver != nil {
-			c.receiver.Send(message)
+	clients := c.clients.FindFirst(2)
+	if len(clients) < 2 {
+		message, _ := json.Marshal(WaitForPeerMessage)
+		for _, client := range clients {
+			_ = client.Send(message)
 		}
 		return nil
 	}
 
-	slog.Debug("PeerConnection: start signalling")
+	c.sender, c.receiver = clients[0], clients[1]
+	slog.Debug("Starting signaling", "peer-connection", c.Id(),
+		"sender", c.sender.Id(), "receiver", c.receiver.Id())
 
-	message, err := json.Marshal(RequestOfferMessage)
-	raisePanic(err) // Remove in production
-
+	message, _ := json.Marshal(RequestOfferMessage)
 	if err := c.sender.Send(message); err != nil {
 		return err
 	}
-	slog.Debug("PeerConnection: send offer-request")
 
 	offer, err := c.sender.Receive()
 	if err != nil {
 		return err
 	}
-	slog.Debug("PeerConnection: receive offer")
 
 	if err := c.receiver.Send(offer); err != nil {
 		return err
 	}
-	slog.Debug("PeerConnection: send offer")
 
 	answer, err := c.receiver.Receive()
 	if err != nil {
 		return err
 	}
-	slog.Debug("PeerConnection: receive answer")
 
 	if err := c.sender.Send(answer); err != nil {
 		return err
 	}
-	slog.Debug("PeerConnection: send answer")
 
-	slog.Debug("PeerConnection: siganlling ended successfuly")
+	slog.Debug("Finished signaling", "peer-connection", c.Id(),
+		"sender", c.sender.Id(), "receiver", c.receiver.Id())
 	return nil
-}
-
-// Use this function only during development
-func raisePanic(err error) {
-	if err != nil {
-		panic(err)
-	}
 }
