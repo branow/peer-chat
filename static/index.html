@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Peer Chat</title>
+  <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+  <div id="videos">
+    <video class="video-player" id="user-1" autoplay playsinline></video>
+    <video class="video-player" id="user-2" autoplay playsinline></video>
+  </div>
+  <div>
+    <style>
+      textarea, button {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 18px;
+        padding: 5px;
+        margin: 5px;
+      }
+      textarea {
+        width: 100%;
+        height: 200px;
+      }
+      button {
+        width: 300px;
+      }
+    </style>
+    <button id="create-offer">Create Offer</button>
+    <textarea id="offer"></textarea>
+    <button id="create-answer">Create Answer</button>
+    <textarea id="answer"></textarea>
+    <button id="add-answer">Add Answer</button>
+  </div>
+</body>
+<script src="main.js"></script>
+</html>
