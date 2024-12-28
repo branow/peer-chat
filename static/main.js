@@ -79,6 +79,13 @@ class PeerConnection {
       await this.peerConnection.setRemoteDescription(answer);
     }
   }
+
+  wait() {
+    this.remoteStream.getTracks().forEach((track) => {
+      track.stop();
+      this.remoteStream.removeTrack(track);
+    });
+  }
 }
 
 const connectionConfig = {
@@ -127,6 +134,21 @@ const initWebsocket = (peerConnection) => {
         await peerConnection.addAnswer(obj);
         console.log('add answer');
         break;
+      case 'wait':
+        peerConnection.wait();
+        switch (obj.data) {
+          case 'Wait for peer':
+            console.log('Please, wait for peer to connect');
+            break;
+          case 'Wait for room':
+            console.log('Please, wait the room is full');
+            break;
+          default:
+            consol.log('Unknown reason:', obj.data);
+        }
+        break;
+      case 'error':
+        throw new Error(`Server Error:`, obj.data);
       default:
         throw new Error(`Invalid object type ${obj.type}`)
     }

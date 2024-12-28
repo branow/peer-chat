@@ -34,16 +34,9 @@ func NewServer() *http.Server {
 func HandleSignalingServer(mux *http.ServeMux) {
 	peerConn := NewPeerConnection()
 	mux.Handle("/ws", websocket.Handler(func(c *websocket.Conn) {
-		peerConn.AddConnection(c)
-		// err := peerConn.AddConnection(c)
-		// if err != nil {
-		// 	_, err := c.Write([]byte(err.Error()))
-		// 	if err != nil {
-		// 		slog.Error("Write Close Error Messsage:", "error", err.Error())
-		// 	}
-		// 	c.Close()
-		// }
-		peerConn.Wait()
+		client := NewClient(c)
+		peerConn.AddClient(client)
+		client.Wait()
 	}))
 }
 
