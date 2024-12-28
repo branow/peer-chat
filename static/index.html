@@ -7,32 +7,32 @@
   <link rel="stylesheet" type="text/css" href="main.css">
 </head>
 <body>
-  <div id="videos">
-    <video class="video-player" id="user-1" autoplay playsinline></video>
-    <video class="video-player" id="user-2" autoplay playsinline></video>
-  </div>
-  <div>
-    <style>
-      textarea, button {
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 18px;
-        padding: 5px;
-        margin: 5px;
-      }
-      textarea {
-        width: 100%;
-        height: 200px;
-      }
-      button {
-        width: 300px;
-      }
-    </style>
-    <button id="create-offer">Create Offer</button>
-    <textarea id="offer"></textarea>
-    <button id="create-answer">Create Answer</button>
-    <textarea id="answer"></textarea>
-    <button id="add-answer">Add Answer</button>
+  <div class="content">
+    <div class="container remote">
+      <video class="video-player" id="remote-video" autoplay playsinline></video>
+    </div>
+    <div class="container local">
+      <video class="video-player" id="local-video" autoplay playsinline></video>
+    </div>
+    <div class="loader-container" id="loader-container">
+      <div class="loader"></div>
+      <div class="loader-message" id="loader-message"></div>
+    </div>
+    <div class="controls">
+      <button class="control" id="micro-control">
+        <img src="./img/mic.png">
+        <img class="mute" id="mute-micro" src="./img/mute.png">
+      </button>
+      <button class="control" id="camera-control">
+        <img src="./img/camera.png">
+        <img class="mute" id="mute-camera" src="./img/mute.png">
+      </button>
+      <button class="control cancel">
+        <img src="./img/phone.png">
+      </button>
+    </div>
   </div>
 </body>
+
 <script type="module" src="./main.js"></script>
 </html>

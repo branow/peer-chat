@@ -1,21 +1,14 @@
 
 export class PeerConnection {
-  constructor(connectionConfig){
+  constructor(connectionConfig, localStream, remoteStream){
     this.connectionConfig = connectionConfig;
+    this.localStream = localStream;
+    this.remoteStream = remoteStream;
     this.peerConnection = null;
-    this.localStream = null;
-    this.remoteStream = null;
   }
 
-  async init() {
-    this.localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    this.remoteStream = new MediaStream();
-  }
-  
   _createConnection() {
     if (this.peerConnection) { this.peerConnection.close(); }
-    
-    console.log('create connection')
     
     this.peerConnection = new RTCPeerConnection(this.connectionConfig);
 
