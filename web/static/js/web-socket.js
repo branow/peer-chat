@@ -1,9 +1,8 @@
 
-const URL = "ws://localhost:8080/ws";
 
 export class PeerChatWebsocket {
-  constructor(peerConnection) {
-    this.websocket = new WebSocket(URL);
+  constructor(url, peerConnection) {
+    this.websocket = new WebSocket(url);
     this.peerConnection = peerConnection;
     this.messageHandlers = {};
   }

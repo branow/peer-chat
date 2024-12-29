@@ -1,0 +1,12 @@
+<html>
+<body>
+  {{ define "room-list" }}
+  <div class="room-list">
+    <div>List of elements</div>
+    {{ range .Rooms }}
+    {{ . }}
+    {{ end }} 
+  </div>
+  {{ end }}
+</body>
+</html>

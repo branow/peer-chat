@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"sort"
@@ -19,6 +19,13 @@ func NewClientList() *ClientList {
 	return &ClientList{
 		clients: map[*Client]uint8{},
 	}
+}
+
+func (cl *ClientList) Size() int {
+	cl.mutex.RLock()
+	defer cl.mutex.RUnlock()
+
+	return len(cl.clients)
 }
 
 func (cl *ClientList) AddClient(client *Client) {

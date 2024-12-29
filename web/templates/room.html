@@ -1,13 +1,7 @@
-<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Peer Chat</title>
-  <link rel="stylesheet" type="text/css" href="main.css">
-</head>
 <body>
-  <div class="content">
+  {{ define "room" }}
+  <div class="room-container">
     <div class="container remote">
       <video class="video-player" id="remote-video" autoplay playsinline></video>
     </div>
@@ -20,19 +14,26 @@
     </div>
     <div class="controls">
       <button class="control" id="micro-control">
-        <img src="./img/mic.png">
-        <img class="mute" id="mute-micro" src="./img/mute.png">
+        <img src="/static/img/mic.png">
+        <img class="mute" id="mute-micro" src="/static/img/mute.png">
       </button>
       <button class="control" id="camera-control">
-        <img src="./img/camera.png">
-        <img class="mute" id="mute-camera" src="./img/mute.png">
+        <img src="/static/img/camera.png">
+        <img class="mute" id="mute-camera" src="/static/img/mute.png">
       </button>
       <button class="control cancel">
-        <img src="./img/phone.png">
+        <img src="/static/img/phone.png">
       </button>
     </div>
   </div>
+  <script>
+    var room = {
+      id: {{ .Id }},
+      name: {{ .Name }},
+      creationTime: {{ .CreationTime }},
+    };
+  </script>
+  <script type="module" src="/static/js/room.js"></script>
+  {{ end }}
 </body>
-
-<script type="module" src="./main.js"></script>
 </html>

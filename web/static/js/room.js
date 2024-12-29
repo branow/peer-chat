@@ -9,6 +9,10 @@ const peerConnectionConfig = {
   ]
 }
 
+const hostname = window.location.hostname
+const port = window.location.port
+const URL = `ws://${hostname}:${port}/ws/room/${room.id}`
+
 class Page {
   constructor() {
     this.localVideo = document.getElementById('local-video');
@@ -99,7 +103,7 @@ const init = async () => {
   page.cameraBtn.click();
 
   
-  const websocket = new PeerChatWebsocket(peerConnection);
+  const websocket = new PeerChatWebsocket(URL, peerConnection);
   websocket.messageHandlers['wait'] = (event) => { 
     const obj = JSON.parse(event.data)
     switch (obj.data) {
@@ -117,35 +121,6 @@ const init = async () => {
   websocket.messageHandlers['offer'] = () => page.hideLoading();
   websocket.messageHandlers['answer'] = () => page.hideLoading();
   websocket.handle();
-}
-
-
-
-const initWebsocket = (peerConnection) => {
-
-  websocket.handle();
-  websocket.onopen = () => {
-    console.log('open:', new Date().toISOString())
-  }
-  websocket.onclose = () => {
-    console.log('close:', new Date().toISOString())
-  }
-  websocket.messageHandlers['request-offer'] = () => console.log('send offer')
-  websocket.messageHandlers['offer'] = () => console.log('send answer')
-  websocket.messageHandlers['request-answer'] = () => console.log('add answer')
-  websocket.messageHandlers['wait'] = (event) => { 
-    const obj = JSON.parse(event.data)
-    switch (obj.data) {
-      case 'Wait for peer':
-        console.log('Please, wait for peer to connect');
-        break;
-      case 'Wait for room':
-        console.log('Please, wait the room is full');
-        break;
-      default:
-        consol.log('Unknown reason:', obj.data);
-    }
-  }
 }
 
 init();

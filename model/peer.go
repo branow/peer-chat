@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"encoding/json"
@@ -24,21 +24,35 @@ var (
 
 // PeerConnection establishes and manages peer-to-peer connection between two clients.
 type PeerConnection struct {
-	id       int // Is used to identify PeerConnection during debugging.
-	clients  *ClientList
-	sender   *Client
-	receiver *Client
+	id                int // Is used to identify PeerConnection during debugging.
+	clients           *ClientList
+	sender            *Client
+	receiver          *Client
+	onEmptyConnection func()
 }
 
 func NewPeerConnection() *PeerConnection {
 	return &PeerConnection{
-		id:      rand.Intn(1e5),
-		clients: NewClientList(),
+		id:                rand.Intn(1e6),
+		clients:           NewClientList(),
+		onEmptyConnection: func() {},
 	}
 }
 
 func (c *PeerConnection) Id() int {
 	return c.id
+}
+
+func (c *PeerConnection) SetOnEmptyConnection(onEmptyConnection func()) {
+	if onEmptyConnection != nil {
+		c.onEmptyConnection = onEmptyConnection
+	}
+}
+
+// GetClients returns the number of clients connected to this
+// peer connection including all which are waiting.
+func (c *PeerConnection) GetClients() int {
+	return c.clients.Size()
 }
 
 // AddClient adds a new client to the peer connection.
@@ -56,6 +70,10 @@ func (c *PeerConnection) AddClient(client *Client) {
 			if err := c.signal(); err != nil {
 				slog.Error("Signaling on client close", "peer-connection", c.Id(),
 					"client", client.Id(), "error", err)
+				return
+			}
+			if c.sender == nil && c.receiver == nil {
+				c.onEmptyConnection()
 			}
 		}
 	})

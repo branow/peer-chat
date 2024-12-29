@@ -1,0 +1,19 @@
+<html>
+<body>
+  {{ define "room-info" }}
+  <div class="room-info">
+    <div>{{ .Id }}</div>
+    <div class="room-info-name">
+      {{ .Name }}
+    </div>
+    <div class="room-info-date">
+      {{ .CreationTime }}
+    </div>
+    <div class="room-info-clients">
+      {{ .Clients }}
+    </div>
+    <button>Connect</button>
+  </div>
+  {{ end }}
+</body>
+</html>

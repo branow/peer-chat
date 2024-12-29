@@ -4,6 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/branow/peer-chat/handlers"
+	"github.com/branow/peer-chat/model"
 	"golang.org/x/net/websocket"
 )
 
@@ -21,8 +23,7 @@ func start() error {
 
 func NewServer() *http.Server {
 	mux := &http.ServeMux{}
-	HandleSignalingServer(mux)
-	HandleResourceServer(mux)
+	handlers.HandleServeMux(mux)
 
 	server := &http.Server{
 		Addr:    ":8080",
@@ -32,14 +33,10 @@ func NewServer() *http.Server {
 }
 
 func HandleSignalingServer(mux *http.ServeMux) {
-	peerConn := NewPeerConnection()
-	mux.Handle("/ws", websocket.Handler(func(c *websocket.Conn) {
-		client := NewClient(c)
+	peerConn := model.NewPeerConnection()
+	mux.Handle("/ws/", websocket.Handler(func(c *websocket.Conn) {
+		client := model.NewClient(c)
 		peerConn.AddClient(client)
 		client.Wait()
 	}))
-}
-
-func HandleResourceServer(mux *http.ServeMux) {
-	mux.Handle("/", http.FileServer(http.Dir("./static")))
 }

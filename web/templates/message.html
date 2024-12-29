@@ -1,0 +1,16 @@
+<html>
+<body>
+  {{ define "message" }}
+  <div class="success-messasge"> {{ .Success}} </div>
+  <div class="error-message"> {{ .Error }} </div>
+  <script>
+    setTimeout(() => {
+      url = {{ .RedirectURL }};
+      if (url) {
+        window.location.href = url;
+      }
+    }, 1000);
+  </script>
+  {{ end }}
+</body>
+</html>

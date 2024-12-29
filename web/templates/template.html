@@ -1,0 +1,20 @@
+{{ define "template" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Peer Chat</title>
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+  <div class="header">
+    <div class="header-title">Peer Chat</div>
+  </div>
+  <div class="content">
+    {{ .Content }}
+  </div>
+</body>
+</html>
+{{ end }}
