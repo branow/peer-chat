@@ -70,11 +70,12 @@ func (c *PeerConnection) AddClient(client *Client) {
 			if err := c.signal(); err != nil {
 				slog.Error("Signaling on client close", "peer-connection", c.Id(),
 					"client", client.Id(), "error", err)
+				c.onEmptyConnection()
 				return
 			}
-			if c.sender == nil && c.receiver == nil {
-				c.onEmptyConnection()
-			}
+		}
+		if c.sender == nil && c.receiver == nil {
+			c.onEmptyConnection()
 		}
 	})
 	c.clients.AddClient(client)

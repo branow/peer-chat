@@ -19,6 +19,7 @@ class Page {
     this.remoteVideo = document.getElementById('remote-video');
     this.loaderContainer = document.getElementById('loader-container');
     this.loaderMessage = document.getElementById('loader-message');
+    this.disconnectBtn = document.getElementById('disconnect-control');
     this.microBtn = document.getElementById('micro-control');
     this.cameraBtn = document.getElementById('camera-control');
     this.muteMicro = document.getElementById('mute-micro');
@@ -43,6 +44,9 @@ class Page {
         this.turnOnCamera();
         this.muteCamera.style.visibility = 'hidden';
       }
+    });
+    this.disconnectBtn.addEventListener('click', () => {
+      window.location.href = "/home"
     });
   } 
   setStreams(local, remote) {

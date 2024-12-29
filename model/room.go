@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -68,6 +69,7 @@ func (m *RoomManager) removeRoom(roomId int) {
 	defer m.mutex.Unlock()
 
 	delete(m.rooms, roomId)
+	slog.Debug("Remove room", "room-id", roomId)
 }
 
 func (m *RoomManager) AddClient(roomId int, client *Client) error {
