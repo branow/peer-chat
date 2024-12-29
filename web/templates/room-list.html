@@ -7,6 +7,15 @@
     {{ . }}
     {{ end }} 
   </div>
+  <script>
+    const rooms = document.querySelectorAll(".room-list .room-info");
+    for (const room of rooms) {
+      const id = room.querySelector(".room-info-id").textContent;
+      room.querySelector(".room-info-connect").addEventListener('click', () => {
+        window.location.href = `/room/${id}`
+      });
+    }
+  </script>
   {{ end }}
 </body>
 </html>

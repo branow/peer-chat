@@ -31,7 +31,7 @@
     <form 
       class="form" 
       hx-post="/x/rooms/create"
-      hx-target=".form-message"
+      hx-target="find .form-message"
     >
       <div class="form-title">
         Create New Room
@@ -66,7 +66,7 @@
     <form 
       class="form"
       hx-put="/x/rooms/connect"
-      hx-target=".form-message"
+      hx-target="find .form-message"
     >
       <div class="form-title">
         Connect
@@ -75,10 +75,10 @@
       <input 
         class="form-input" 
         type="text"
-        name="name"
-        placeholder="Type room url"
+        name="id"
+        placeholder="Type room id"
       >
-      <input type="submit" value="submit">
+      <input type="submit" value="connect">
     </form>
   </div>
 

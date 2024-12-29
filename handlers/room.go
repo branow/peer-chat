@@ -29,6 +29,7 @@ func (h RoomHandlers) HandleServeMux(mux *http.ServeMux) {
 	h.GetRoomPage().ServeMux(mux)
 	h.GetRoomList().ServeMux(mux)
 	h.PostCreateRoom().ServeMux(mux)
+	h.PutConnect().ServeMux(mux)
 }
 
 func (h RoomHandlers) WsRoom() HandlerAdapter {
@@ -167,6 +168,40 @@ func (h RoomHandlers) PostCreateRoom() HandlerAdapter {
 	return *handler
 }
 
+func (h RoomHandlers) PutConnect() HandlerAdapter {
+	handler := NewHandlerAdapter("PUT /x/rooms/connect")
+
+	handler.AddHandler(func(w http.ResponseWriter, r *http.Request) error {
+		roomIdStr := r.PostFormValue("id")
+		roomId, err := strconv.ParseInt(roomIdStr, 10, 64)
+		if err != nil {
+			return valid.NewValidationError("room id must be an integer")
+		}
+
+		if _, err := h.manager.GetRoom(int(roomId)); err != nil {
+			return err
+		}
+
+		messageTmpl, err := FindView(MessageView)
+		if err != nil {
+			return err
+		}
+
+		message := message{
+			Success:     "Room was found successfully",
+			RedirectURL: fmt.Sprintf("/room/%d", roomId),
+		}
+		return messageTmpl.ExecuteTemplate(w, MessageView, message)
+	})
+
+	handler.AddErrorHandler(func(err error) bool {
+		var validErr *valid.ValidationError
+		return errors.As(err, &validErr) || errors.Is(err, model.ErrRoomDoesNotExist)
+	}, handleFormError)
+	handler.AddErrorHandler(func(err error) bool { return true }, handleError500)
+
+	return *handler
+}
 func handleFormError(err error, w http.ResponseWriter, r *http.Request) {
 	slog.Debug("Response Status 400", "error", err, "url", r.URL)
 	message := message{Error: err.Error()}

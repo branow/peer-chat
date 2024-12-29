@@ -2,7 +2,7 @@
 <body>
   {{ define "room-info" }}
   <div class="room-info">
-    <div>{{ .Id }}</div>
+    <div class="room-info-id">{{ .Id }}</div>
     <div class="room-info-name">
       {{ .Name }}
     </div>
@@ -12,7 +12,7 @@
     <div class="room-info-clients">
       {{ .Clients }}
     </div>
-    <button>Connect</button>
+    <button class="room-info-connect">Connect</button>
   </div>
   {{ end }}
 </body>
