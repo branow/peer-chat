@@ -16,7 +16,12 @@
     </div>
     <div class="rooms">
       <div class="rooms-search">
-        <input class="search-bar text-input" type="text" placeholder="Type room name...">
+        <input 
+          class="search-bar text-input" 
+          id="room-search-bar"
+          type="text" 
+          placeholder="Type room name..."
+        >
       </div>
       <div 
         class="room-list-container"
@@ -25,6 +30,26 @@
       ></div>
     </div>
   </div>
+
+  <script>
+    let isSearching = false;
+    const searchBar = document.getElementById("room-search-bar");
+    searchBar.addEventListener('keyup', () => {
+      if (!isSearching) {
+        setTimeout(() => {
+          isSearching = true;
+          const query = searchBar.value.toLocaleLowerCase();
+          const rooms = document.querySelectorAll('.room-info');
+          console.log(query);
+          for (const room of rooms) {
+            const name = room.querySelector('.room-info-name').textContent.toLocaleLowerCase();
+            room.style.display = name.includes(query) ?  "flex" : "none"
+          }
+          isSearching = false;
+        }, 300)
+      }
+    });
+  </script>
   
   <div class="fixed-form" id="create-form" style="visibility: hidden;">
     <form 
