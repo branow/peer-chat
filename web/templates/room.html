@@ -21,6 +21,9 @@
         <img src="/static/img/camera.png">
         <img class="mute" id="mute-camera" src="/static/img/mute.png">
       </button>
+      <button class="control" id="invite-control">
+        <img src="/static/img/invite.png">
+      </button>
       <button class="control cancel" id="disconnect-control">
         <img src="/static/img/phone.png">
       </button>
@@ -34,6 +37,57 @@
     };
   </script>
   <script type="module" src="/static/js/room.js"></script>
+
+  <div class="fixed-form" id="invite-form">
+    <div class="form">
+      <div class="form-title">
+        Invite a fiend
+      </div>
+      <div class="hint">Share the room id with your friend.</div>
+      <div class="hint color-bright-blue" id="copy-id">Copied to clipboard</div>
+      <input 
+        class="form-input text-input" 
+        type="text"
+        name="id"
+        value=""
+        readonly
+      >
+      <div class="hint">Or share the room URL.</div>
+      <div class="hint color-bright-blue" id="copy-url">Copied to clipboard</div>
+      <input 
+        class="form-input text-input" 
+        type="text"
+        name="url"
+        value=""
+        readonly
+      >
+    </form>
+  </div>
+  
+  <script>
+    const inviteForm = document.getElementById("invite-form");
+    const inviteFormBtn = document.getElementById("invite-control");
+    createFixedForm(inviteForm, inviteFormBtn);
+    
+    const createCopyInput = (input, copyMessage) => {
+      copyMessage.style.display = 'none';
+      input.addEventListener('click', () => {
+        navigator.clipboard.writeText(input.value);
+        copyMessage.style.display = 'block';
+        setTimeout(() => copyMessage.style.display = 'none', 2000);
+      });
+    }
+
+    const inviteFormId = inviteForm.querySelector('input[name="id"]');
+    inviteFormId.value = room.id;
+    const inviteFormIdCopy = inviteForm.querySelector('#copy-id');
+    createCopyInput(inviteFormId, inviteFormIdCopy);
+
+    const inviteFormUrl = inviteForm.querySelector('input[name="url"]');
+    inviteFormUrl.value = window.location.href;
+    const inviteFormUrlCopy = inviteForm.querySelector('#copy-url');
+    createCopyInput(inviteFormUrl, inviteFormUrlCopy);
+  </script>
   {{ end }}
 </body>
 </html>

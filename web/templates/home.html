@@ -51,7 +51,7 @@
     });
   </script>
   
-  <div class="fixed-form" id="create-form" style="visibility: hidden;">
+  <div class="fixed-form" id="create-form">
     <form 
       class="form" 
       hx-post="/x/rooms/create"
@@ -92,7 +92,7 @@
     </form>
   </div>
   
-  <div class="fixed-form" id="connect-form" style="visibility: hidden;">
+  <div class="fixed-form" id="connect-form">
     <form 
       class="form"
       hx-put="/x/rooms/connect"
@@ -114,30 +114,19 @@
 
   <script>
     const createFormPage = document.getElementById('create-form');
-    createFormPage.addEventListener('click', (event) => {
-      if (event.target === createFormPage) {
-        createFormPage.style.visibility = 'hidden';
-      }
-    });
-    document.getElementById('create-btn').addEventListener('click', () => {
-      createFormPage.style.visibility = '';
-    });
+    const createFormBtn = document.getElementById('create-btn');
+    createFixedForm(createFormPage, createFormBtn);
     const createForm = createFormPage.querySelector('form');
     createForm.addEventListener('htmx:responseError', (event) => {
       if (event.detail.xhr.status === 400) {
         createForm.querySelector('.form-message').innerHTML = event.detail.xhr.responseText;
       }
     });
+
     const connectFormPage = document.getElementById('connect-form');
-    connectFormPage.addEventListener('click', (event) => {
-      if (event.target === connectFormPage) {
-        connectFormPage.style.visibility = 'hidden';
-      }
-    });
-    document.getElementById('connect-btn').addEventListener('click', () => {
-      connectFormPage.style.visibility = '';
-    });
-    const connectForm = document.querySelector('form')
+    const connectFormBtn = document.getElementById('connect-btn');
+    createFixedForm(connectFormPage, connectFormBtn);
+    const connectForm = document.querySelector('form');
     connectForm.addEventListener('htmx:responseError', (event) => {
       if (event.detail.xhr.status === 400) {
         connectForm.querySelector('.form-message').innerHTML = event.detail.xhr.responseText;

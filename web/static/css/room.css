@@ -1,7 +1,8 @@
 .room-container {
   position: relative;
-  height: 95vh;
+  height: calc(100vh - 7vh);
   width: 100%;
+  overflow-y: hidden;
 }
 
 .container {
