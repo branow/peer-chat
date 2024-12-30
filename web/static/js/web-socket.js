@@ -11,6 +11,7 @@ export class PeerChatWebsocket {
     this.websocket.onopen = (event) => this.call(this.onopen.bind(this), event);
     this.websocket.onclose = (event) => this.call(this.onclose.bind(this), event);
     this.websocket.onmessage = (event) => this.call(this.onmessage.bind(this), event);
+    this.websocket.onerror = (event) => this.call(this.onerror.bind(this), event);
   }
   
   async onmessage(event) {

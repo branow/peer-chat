@@ -1,0 +1,36 @@
+.error-page {
+  width: 100%;
+  height: 100%;
+  background-color: var(--white);
+  color: var(--lightblue);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+}
+
+.error-container {
+  max-width: 750px;
+  width: 60vw;
+  min-width: 300px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.error-status {
+  font-weight: bold;
+  font-size: 10rem;
+  line-height: 1;
+}
+
+.error-title {
+  font-weight: bold;
+  font-size: 2.5rem;
+}

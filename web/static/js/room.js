@@ -24,6 +24,9 @@ class Page {
     this.cameraBtn = document.getElementById('camera-control');
     this.muteMicro = document.getElementById('mute-micro');
     this.muteCamera = document.getElementById('mute-camera');
+    this.errorMessageContainer = document.querySelector('.err-message-container');
+    this.errorMessageContainer.style.display = "none";
+    this.errorMessage = document.querySelector('.err-message');
     
     this.microBtn.addEventListener('click', () => {
       const isOn = this.muteMicro.style.visibility === 'hidden';
@@ -60,6 +63,10 @@ class Page {
   hideLoading() {
     this.loaderContainer.style.visibility = "hidden";
     this.loaderMessage.text = "";
+  }
+  setError(message) {
+    this.errorMessage.innerHTML = message;
+    this.errorMessageContainer.style.display = "flex";
   }
   turnOnMicrophone() {}
   turnOffMicrophone() {}
@@ -106,8 +113,11 @@ const init = async () => {
   page.microBtn.click();
   page.cameraBtn.click();
 
-  
   const websocket = new PeerChatWebsocket(URL, peerConnection);
+  websocket.onerror = (event) => {
+    const message = "Oops, it looks like this room has been deleted. Please choose another room to continue.";
+    page.setError(message);
+  }
   websocket.messageHandlers['wait'] = (event) => { 
     const obj = JSON.parse(event.data)
     switch (obj.data) {
@@ -121,6 +131,9 @@ const init = async () => {
         page.setLoading('Please, wait a bit')
         throw new Error(`Unknown reason to wait: ${obj.data}`)
     }
+  }
+  websocket.messageHandlers['error'] = (event) => {
+    console.log(event.data)
   }
   websocket.messageHandlers['offer'] = () => page.hideLoading();
   websocket.messageHandlers['answer'] = () => page.hideLoading();

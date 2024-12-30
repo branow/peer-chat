@@ -1,0 +1,25 @@
+<html>
+<body>
+  {{ define "error" }}
+  <div class="error-page">
+    <div class="error-container">
+      <div class="error-status">{{ .Status }}</div>
+      <div class="error-title">{{ .Title }}</div>
+      <div class="error-message">{{ .Message }}</div>
+      {{ if .GoHome }}
+      <button 
+        id="go-home-btn"
+        class="usual-button bright-button"
+      >Go To Home Page</button>
+      <script>
+        const goHomeBtn = document.getElementById("go-home-btn");
+        goHomeBtn.addEventListener('click', () => {
+          window.location.href = `/home`
+        });
+      </script>
+      {{ end }}
+    </div>
+  </div>
+  {{ end }}
+</body>
+</html>

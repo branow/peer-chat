@@ -1,7 +1,11 @@
 <html>
 <body>
   {{ define "room-list" }}
+  {{ if gt (len .Rooms) 0 }}
   <div class="color-bright-blue"><strong>Public Rooms: {{ len .Rooms }}</strong></div>
+  {{ else }}
+  <div class="color-bright-blue">It looks like there are no public rooms.</div>
+  {{ end }}
   <div class="room-list">
     {{ range .Rooms }}
     {{ . }}

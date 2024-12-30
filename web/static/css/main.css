@@ -53,14 +53,32 @@ body {
   position: absolute;
   top: 7vh;
   width: 100vw;
-  background-color: var(--blue);
+  background-color: var(--white);
   min-height: calc(100vh - 7vh);
   overflow-x: hidden;
+}
+
+footer {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  justify-content: center;
+  align-content: center;
+  background-color: var(--blue);
+}
+
+.copyright {
+  text-align: center;
+  font-size: 1rem;
 }
 
 .page {
   display: flex;
   flex-direction: column;
+  background-color: var(--blue);
 }
 
 .quick-start {
@@ -152,6 +170,8 @@ body {
 }
 
 .search-bar {
+  width: 50vw;
+  min-width: 250px;
 }
 
 .search-bar:focus-visible {
@@ -160,6 +180,7 @@ body {
 .room-list-container {
   color: var(--lightblue);
   padding: 1rem;
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-items: center;
@@ -314,9 +335,4 @@ body {
 
 .hint {
   font-size: 0.9rem;
-}
-
-.copyright {
-  text-align: center;
-  font-size: 1rem;
 }

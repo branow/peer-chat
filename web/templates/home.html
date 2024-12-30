@@ -126,7 +126,7 @@
     const connectFormPage = document.getElementById('connect-form');
     const connectFormBtn = document.getElementById('connect-btn');
     createFixedForm(connectFormPage, connectFormBtn);
-    const connectForm = document.querySelector('form');
+    const connectForm = connectFormPage.querySelector('form');
     connectForm.addEventListener('htmx:responseError', (event) => {
       if (event.detail.xhr.status === 400) {
         connectForm.querySelector('.form-message').innerHTML = event.detail.xhr.responseText;

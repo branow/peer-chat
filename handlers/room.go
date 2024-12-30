@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -55,7 +54,7 @@ func (h RoomHandlers) WsRoom() HandlerAdapter {
 		return err
 	})
 
-	handler.AddErrorHandler(func(err error) bool { return true }, handleError500)
+	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorMessage(newError500))
 	return *handler
 }
 
@@ -69,29 +68,24 @@ func (h RoomHandlers) GetRoomPage() HandlerAdapter {
 			return errors.New("404")
 		}
 
-		roomTmpl, err := FindView(RoomView)
-		if err != nil {
-			return err
-		}
-
 		roomInfo, err := h.manager.GetRoom(int(roomId))
 		if err != nil {
 			return err
 		}
 
 		buf := bytes.NewBufferString("")
-		if err := roomTmpl.ExecuteTemplate(buf, RoomView, roomInfo); err != nil {
+		if err := ExecuteView(RoomView, buf, roomInfo); err != nil {
 			return err
 		}
 
 		roomHtml := buf.String()
 		model := templateModel{Content: template.HTML(roomHtml)}
-		return executeTemplateView(w, model)
+		return ExecuteView(TemplateView, w, model)
 	})
 
-	handler.AddErrorHandler(func(err error) bool { return err.Error() == "404" }, handleError404)
-	handler.AddErrorHandler(func(err error) bool { return errors.Is(err, model.ErrRoomDoesNotExist) }, handleError404)
-	handler.AddErrorHandler(func(err error) bool { return true }, handleError500)
+	handler.AddErrorHandler(func(err error) bool { return err.Error() == "404" }, handleErrorPage(newError404))
+	handler.AddErrorHandler(func(err error) bool { return errors.Is(err, model.ErrRoomDoesNotExist) }, handleErrorPage(newError404))
+	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorPage(newError500))
 	return *handler
 }
 
@@ -114,15 +108,10 @@ func (h RoomHandlers) GetRoomList() HandlerAdapter {
 			roomsHtml = append(roomsHtml, template.HTML(buf.String()))
 		}
 
-		roomListTmpl, err := FindView(RoomListView)
-		if err != nil {
-			return err
-		}
-
 		model := struct{ Rooms []template.HTML }{Rooms: roomsHtml}
-		return roomListTmpl.ExecuteTemplate(w, RoomListView, model)
+		return ExecuteView(RoomListView, w, model)
 	})
-	handler.AddErrorHandler(func(err error) bool { return true }, handleError500)
+	handler.AddErrorHandler(func(err error) bool { return true }, handleError(newError500))
 	return *handler
 }
 
@@ -130,11 +119,6 @@ func (h RoomHandlers) PostCreateRoom() HandlerAdapter {
 	handler := NewHandlerAdapter("POST /x/rooms/create")
 
 	handler.AddHandler(func(w http.ResponseWriter, r *http.Request) error {
-		messageTmpl, err := FindView(MessageView)
-		if err != nil {
-			return err
-		}
-
 		name := r.PostFormValue("name")
 		accessStr := r.PostFormValue("access")
 
@@ -157,14 +141,14 @@ func (h RoomHandlers) PostCreateRoom() HandlerAdapter {
 			Success:     "Room was created successfully",
 			RedirectURL: fmt.Sprintf("/room/%d", roomId),
 		}
-		return messageTmpl.ExecuteTemplate(w, MessageView, message)
+		return ExecuteView(MessageView, w, message)
 	})
 
 	handler.AddErrorHandler(func(err error) bool {
 		var validErr *valid.ValidationError
 		return errors.As(err, &validErr) || errors.Is(err, model.ErrRoomAlreadyExists)
-	}, handleFormError)
-	handler.AddErrorHandler(func(err error) bool { return true }, handleError500)
+	}, handleErrorMessage(newError400))
+	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorMessage(newError500))
 
 	return *handler
 }
@@ -183,39 +167,20 @@ func (h RoomHandlers) PutConnect() HandlerAdapter {
 			return err
 		}
 
-		messageTmpl, err := FindView(MessageView)
-		if err != nil {
-			return err
-		}
-
 		message := message{
 			Success:     "Room was found successfully",
 			RedirectURL: fmt.Sprintf("/room/%d", roomId),
 		}
-		return messageTmpl.ExecuteTemplate(w, MessageView, message)
+		return ExecuteView(MessageView, w, message)
 	})
 
 	handler.AddErrorHandler(func(err error) bool {
 		var validErr *valid.ValidationError
 		return errors.As(err, &validErr) || errors.Is(err, model.ErrRoomDoesNotExist)
-	}, handleFormError)
-	handler.AddErrorHandler(func(err error) bool { return true }, handleError500)
+	}, handleErrorMessage(newError400))
+	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorMessage(newError500))
 
 	return *handler
-}
-func handleFormError(err error, w http.ResponseWriter, r *http.Request) {
-	slog.Debug("Response Status 400", "error", err, "url", r.URL)
-	message := message{Error: err.Error()}
-	logError := func(err error) { slog.Error("Handler Form Error", "error", err) }
-	w.WriteHeader(http.StatusBadRequest)
-	messageTmpl, err := FindView(MessageView)
-	if err != nil {
-		logError(err)
-		return
-	}
-	if err := messageTmpl.ExecuteTemplate(w, MessageView, message); err != nil {
-		logError(err)
-	}
 }
 
 type roomInfoDTO struct {
