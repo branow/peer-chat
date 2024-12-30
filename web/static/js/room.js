@@ -114,21 +114,21 @@ const init = async () => {
   page.cameraBtn.click();
 
   const websocket = new PeerChatWebsocket(URL, peerConnection);
-  websocket.onerror = (event) => {
-    const message = "Oops, it looks like this room has been deleted. Please choose another room to continue.";
+  websocket.onerror = () => {
+    const message = locale.get("room-error");
     page.setError(message);
   }
   websocket.messageHandlers['wait'] = (event) => { 
     const obj = JSON.parse(event.data)
     switch (obj.data) {
       case 'Wait for peer':
-        page.setLoading('Please, wait for peer to connect.');
+        page.setLoading(locale.get("room-wait-peer"));
         break;
       case 'Wait for room':
-        page.setLoading('Please, wait for someone to get out, the room is full.');
+        page.setLoading(locale.get("room-wait-room"));
         break;
       default:
-        page.setLoading('Please, wait a bit')
+        page.setLoading(locale.get("room-wait-unknown"))
         throw new Error(`Unknown reason to wait: ${obj.data}`)
     }
   }

@@ -9,15 +9,18 @@
     <div class="room-info-name">
       {{ .Name }}
     </div>
-    <div class="room-info-clients">
+    <div class="room-info-clients" data-i18n="room-info-participants">
       People: {{ .Clients }}
     </div>
     {{ if ge .Clients 2 }}
-    <div class="hint">
+    <div class="hint" data-i18n="room-info-hint">
       The room is full, you will have to wait until someone disconnects.
     </div>
     {{ end }}
-    <button class="room-info-connect usual-button bright-button">Connect</button>
+    <button 
+      class="room-info-connect usual-button bright-button" 
+      data-i18n="room-info-connect"
+    >Connect</button>
   </div>
   {{ end }}
 </body>

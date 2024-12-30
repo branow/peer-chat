@@ -2,9 +2,9 @@
 <body>
   {{ define "room-list" }}
   {{ if gt (len .Rooms) 0 }}
-  <div class="color-bright-blue"><strong>Public Rooms: {{ len .Rooms }}</strong></div>
+  <div class="color-bright-blue"><strong><span data-i18n="room-list-public-rooms">Public Rooms:</span> {{ len .Rooms }}</strong></div>
   {{ else }}
-  <div class="color-bright-blue">It looks like there are no public rooms.</div>
+  <div class="color-bright-blue" data-i18n="room-list-no-public-rooms">It looks like there are no public rooms.</div>
   {{ end }}
   <div class="room-list">
     {{ range .Rooms }}

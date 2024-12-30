@@ -3,15 +3,23 @@
   {{ define "home" }}
   <div class="page">
     <div class="quick-start">
-      <div class="quick-start-title">Peer Chat</div>
+      <div class="quick-start-title" data-i18n="quick-start-title">Peer Chat</div>
       <div class="about">
-        <p>Welcome to Peer Chat! Here, you can connect with anyone, anywhere in the world, through the internet.</p>
-        <p>Simply click the <strong class="color-bright-blue">Create</strong> button below to set up your own room. Invite your friends or meet someone new. If your friends already have a room, join them by clicking the <strong class="color-bright-blue">Connect</strong> button.</p>
-        <p>You can also join public rooms listed below and start engaging with others right away. The choice is yours!</p>
+        <p data-i18n="quick-start-about-1">Welcome to Peer Chat! Here, you can connect with anyone, anywhere in the world, through the internet.</p>
+        <p data-i18n="quick-start-about-2">Simply click the <strong class="color-bright-blue">Create</strong> button below to set up your own room. Invite your friends or meet someone new. If your friends already have a room, join them by clicking the <strong class="color-bright-blue">Connect</strong> button.</p>
+        <p data-i18n="quick-start-about-3">You can also join public rooms listed below and start engaging with others right away. The choice is yours!</p>
       </div>
       <div class="start-buttons">
-        <button class="usual-button bright-button" id="create-btn">Create Room</button>
-        <button class="usual-button transparent-button" id="connect-btn">Connect to Room</button>
+        <button 
+          class="usual-button bright-button" 
+          id="create-btn"
+          data-i18n="create-room-btn"
+        >Create Room</button>
+        <button 
+          class="usual-button transparent-button" 
+          id="connect-btn"
+          data-i18n="connect-to-room-btn"
+        >Connect to Room</button>
       </div>
     </div>
     <div class="rooms">
@@ -20,6 +28,7 @@
           class="search-bar text-input" 
           id="room-search-bar"
           type="text" 
+          data-i18n-placeholder="search-bar-placeholder"
           placeholder="Type room name..."
         >
       </div>
@@ -57,14 +66,16 @@
       hx-post="/x/rooms/create"
       hx-target="find .form-message"
     >
-      <div class="form-title">
-        Create New Room
-      </div>
+      <div 
+        class="form-title" 
+        data-i18n="create-room-form-title"
+      >Create New Room</div>
       <div class="form-message"></div>
       <input 
         class="form-input text-input" 
         type="text"
         name="name"
+        data-i18n-placeholder="create-room-form-name-placeholder"
         placeholder="Type room name"
       >
       <div class="radio-group">
@@ -76,7 +87,7 @@
             value="1"
             checked
           >
-          <label>public</label>
+          <label data-i18n="create-room-form-public">public</label>
         </div>
         <div>
           <input
@@ -85,10 +96,15 @@
             name="access"
             value="0"
           >
-          <label>private</label>
+          <label data-i18n="create-room-form-private">private</label>
         </div>
       </div>
-      <input class="usual-button bright-button" type="submit" value="Create">
+      <input 
+        class="usual-button bright-button" 
+        data-i18n-value="create-room-form-submit-value"
+        type="submit" 
+        value="Create"
+      >
     </form>
   </div>
   
@@ -98,7 +114,7 @@
       hx-put="/x/rooms/connect"
       hx-target="find .form-message"
     >
-      <div class="form-title">
+      <div class="form-title" data-i18n="connect-room-form-title">
         Connect to Room
       </div>
       <div class="form-message"></div>
@@ -106,9 +122,15 @@
         class="form-input text-input" 
         type="text"
         name="id"
+        data-i18n="connect-room-form-id-placeholder"
         placeholder="Type room id"
       >
-      <input class="usual-button bright-button" type="submit" value="connect">
+      <input 
+        class="usual-button bright-button" 
+        data-i18n="connect-room-form-submit-value"
+        type="submit" 
+        value="connect"
+      >
     </form>
   </div>
 
