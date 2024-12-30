@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"log/slog"
+	"slices"
 	"sync"
 	"time"
 
@@ -25,26 +26,39 @@ func NewRoomManager() *RoomManager {
 	}
 }
 
-func (m *RoomManager) GetRoom(roomId int) (roomInfo, error) {
+func (m *RoomManager) GetRoom(roomId int) (RoomInfo, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
 	if room, ok := m.rooms[roomId]; ok {
 		return *newRoomInfo(*room), nil
 	}
-	return roomInfo{}, ErrRoomDoesNotExist
+	return RoomInfo{}, ErrRoomDoesNotExist
 }
 
-func (m *RoomManager) GetPublicRooms() []roomInfo {
+func (m *RoomManager) GetPublicRooms() []RoomInfo {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
-	rooms := []roomInfo{}
+	rooms := []RoomInfo{}
 	for _, room := range m.rooms {
+		// Check wheather the room is empty and remove it if so
+		if room.GetClients() == 0 {
+			m.removeRoom(room.id)
+			continue
+		}
+
 		if room.access == public {
 			rooms = append(rooms, *newRoomInfo(*room))
 		}
 	}
+	// Sort rooms by creation date
+	slices.SortFunc(rooms, func(r1, r2 RoomInfo) int {
+		if r1.CreationTime.After(r2.CreationTime) {
+			return -1
+		}
+		return 1
+	})
 	return rooms
 }
 
@@ -130,15 +144,15 @@ func newRoom(name string, access int) *room {
 	}
 }
 
-type roomInfo struct {
+type RoomInfo struct {
 	Id           int
 	Name         string
 	Clients      int
 	CreationTime time.Time
 }
 
-func newRoomInfo(room room) *roomInfo {
-	return &roomInfo{
+func newRoomInfo(room room) *RoomInfo {
+	return &RoomInfo{
 		Id:           room.Id(),
 		Name:         room.name,
 		Clients:      room.GetClients(),

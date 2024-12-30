@@ -107,7 +107,8 @@ func (h RoomHandlers) GetRoomList() HandlerAdapter {
 		roomsHtml := []template.HTML{}
 		for _, room := range rooms {
 			buf := bytes.NewBufferString("")
-			if err := roomTmpl.ExecuteTemplate(buf, RoomInfoView, room); err != nil {
+			dto := newRoomInfoDTO(room)
+			if err := roomTmpl.ExecuteTemplate(buf, RoomInfoView, dto); err != nil {
 				return err
 			}
 			roomsHtml = append(roomsHtml, template.HTML(buf.String()))
@@ -214,6 +215,22 @@ func handleFormError(err error, w http.ResponseWriter, r *http.Request) {
 	}
 	if err := messageTmpl.ExecuteTemplate(w, MessageView, message); err != nil {
 		logError(err)
+	}
+}
+
+type roomInfoDTO struct {
+	Id           int
+	Name         string
+	Clients      int
+	CreationTime string
+}
+
+func newRoomInfoDTO(room model.RoomInfo) *roomInfoDTO {
+	return &roomInfoDTO{
+		Id:           room.Id,
+		Name:         room.Name,
+		Clients:      room.Clients,
+		CreationTime: room.CreationTime.Format("15:04"),
 	}
 }
 
