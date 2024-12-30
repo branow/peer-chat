@@ -18,6 +18,7 @@ func main() {
 
 func start() error {
 	server := NewServer()
+	slog.Info("Server started", "addr", server.Addr)
 	return server.ListenAndServe()
 }
 

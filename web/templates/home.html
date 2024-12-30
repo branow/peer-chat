@@ -3,21 +3,20 @@
   {{ define "home" }}
   <div class="page">
     <div class="quick-start">
+      <div class="quick-start-title">Peer Chat</div>
       <div class="about">
-        Hi, Here you can have a meeting with person from any place
-        by internet.  Click button "create" below to create you own 
-        room and invite your friends or meet a stranger. If your friends 
-        already there just connection to them pressing button 'connect'.
-        Any way, you always can connect to someones meeting/room. See them below. 
+        <p>Welcome to Peer Chat! Here, you can connect with anyone, anywhere in the world, through the internet.</p>
+        <p>Simply click the <strong class="color-bright-blue">Create</strong> button below to set up your own room. Invite your friends or meet someone new. If your friends already have a room, join them by clicking the <strong class="color-bright-blue">Connect</strong> button.</p>
+        <p>You can also join public rooms listed below and start engaging with others right away. The choice is yours!</p>
       </div>
       <div class="start-buttons">
-        <button>Create</button>
-        <button>Connect</button>
+        <button class="usual-button bright-button" id="create-btn">Create Room</button>
+        <button class="usual-button transparent-button" id="connect-btn">Connect to Room</button>
       </div>
     </div>
     <div class="rooms">
       <div class="rooms-search">
-
+        <input class="search-bar text-input" type="text" placeholder="Type room name...">
       </div>
       <div 
         class="room-list-container"
@@ -27,7 +26,7 @@
     </div>
   </div>
   
-  <div class="fixed-form" id="create-form">
+  <div class="fixed-form" id="create-form" style="visibility: hidden;">
     <form 
       class="form" 
       hx-post="/x/rooms/create"
@@ -38,64 +37,92 @@
       </div>
       <div class="form-message"></div>
       <input 
-        class="form-input" 
+        class="form-input text-input" 
         type="text"
         name="name"
         placeholder="Type room name"
       >
-      <input
-        class="form-input"
-        type="radio"
-        name="access"
-        value="1"
-        checked
-      >
-      <label>public</label>
-      <input
-        class="form-input"
-        type="radio"
-        name="access"
-        value="0"
-      >
-      <label>private</label>
-      <input type="submit" value="submit">
+      <div class="radio-group">
+        <div>
+          <input
+            class="form-input radio-input"
+            type="radio"
+            name="access"
+            value="1"
+            checked
+          >
+          <label>public</label>
+        </div>
+        <div>
+          <input
+            class="form-input radio-input"
+            type="radio"
+            name="access"
+            value="0"
+          >
+          <label>private</label>
+        </div>
+      </div>
+      <input class="usual-button bright-button" type="submit" value="Create">
     </form>
   </div>
   
-  <div class="fixed-form" id="connect-form">
+  <div class="fixed-form" id="connect-form" style="visibility: hidden;">
     <form 
       class="form"
       hx-put="/x/rooms/connect"
       hx-target="find .form-message"
     >
       <div class="form-title">
-        Connect
+        Connect to Room
       </div>
       <div class="form-message"></div>
       <input 
-        class="form-input" 
+        class="form-input text-input" 
         type="text"
         name="id"
         placeholder="Type room id"
       >
-      <input type="submit" value="connect">
+      <input class="usual-button bright-button" type="submit" value="connect">
     </form>
   </div>
 
   <script>
-    const createForm = document.getElementById('create-form');
+    const createFormPage = document.getElementById('create-form');
+    createFormPage.addEventListener('click', (event) => {
+      if (event.target === createFormPage) {
+        createFormPage.style.visibility = 'hidden';
+      }
+    });
+    document.getElementById('create-btn').addEventListener('click', () => {
+      createFormPage.style.visibility = '';
+    });
+    const createForm = createFormPage.querySelector('form');
     createForm.addEventListener('htmx:responseError', (event) => {
       if (event.detail.xhr.status === 400) {
         createForm.querySelector('.form-message').innerHTML = event.detail.xhr.responseText;
       }
     });
-    const connectForm = document.getElementById('connect-form');
+    const connectFormPage = document.getElementById('connect-form');
+    connectFormPage.addEventListener('click', (event) => {
+      if (event.target === connectFormPage) {
+        connectFormPage.style.visibility = 'hidden';
+      }
+    });
+    document.getElementById('connect-btn').addEventListener('click', () => {
+      connectFormPage.style.visibility = '';
+    });
+    const connectForm = document.querySelector('form')
     connectForm.addEventListener('htmx:responseError', (event) => {
       if (event.detail.xhr.status === 400) {
         connectForm.querySelector('.form-message').innerHTML = event.detail.xhr.responseText;
       }
     });
   </script>
+
+  <footer>
+    <p class="copyright">&copy; 2024 Orest Bodnar. All Rights Reserved.</p>
+  </footer>
   {{ end }}
 </body>
 </html>

@@ -1,8 +1,8 @@
 <html>
 <body>
   {{ define "room-list" }}
+  <div class="color-bright-blue"><strong>Public Rooms: {{ len .Rooms }}</strong></div>
   <div class="room-list">
-    <div>List of elements</div>
     {{ range .Rooms }}
     {{ . }}
     {{ end }} 

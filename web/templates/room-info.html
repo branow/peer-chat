@@ -2,17 +2,22 @@
 <body>
   {{ define "room-info" }}
   <div class="room-info">
-    <div class="room-info-id">{{ .Id }}</div>
-    <div class="room-info-name">
-      {{ .Name }}
-    </div>
     <div class="room-info-date">
       {{ .CreationTime }}
     </div>
-    <div class="room-info-clients">
-      {{ .Clients }}
+    <div class="room-info-id" style="display: none;">{{ .Id }}</div>
+    <div class="room-info-name">
+      {{ .Name }}
     </div>
-    <button class="room-info-connect">Connect</button>
+    <div class="room-info-clients">
+      People: {{ .Clients }}
+    </div>
+    {{ if ge .Clients 2 }}
+    <div class="hint">
+      The room is full, you will have to wait until someone disconnects.
+    </div>
+    {{ end }}
+    <button class="room-info-connect usual-button bright-button">Connect</button>
   </div>
   {{ end }}
 </body>
