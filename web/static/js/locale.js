@@ -62,7 +62,7 @@ class LocaleSwitcher {
         this.locale.setLocale(locale);
         buttons.forEach(b => b.setAttribute('locale-on', 'false'));
         btn.setAttribute('locale-on', 'true');
-      })
+      });
     }
   }
 

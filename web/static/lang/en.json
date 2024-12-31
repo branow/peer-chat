@@ -28,5 +28,6 @@
   "room-error": "Oops! It seems this room has been deleted. Please choose another room to continue.",
   "room-wait-peer": "Waiting for a peer to connect...",
   "room-wait-room": "The room is full. Please wait until a spot opens up.",
-  "room-wait-unknown": "Please, wait a moment..."
+  "room-wait-unknown": "Please, wait a moment...",
+  "go-home-btn": "Go to home page"
 }

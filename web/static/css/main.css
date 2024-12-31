@@ -74,11 +74,15 @@ body {
   border-radius: 5px;
 }
 
-.locale-btn:hover {
+.locale-btn[locale-on='false'] {
+  cursor: pointer;
+}
+
+.locale-btn[locale-on='false']:hover {
   background-color: #0005;
 }
 
-.locale-btn:active {
+.locale-btn[locale-on='false']:active {
   background-color: #0002;
 }
 
