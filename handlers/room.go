@@ -37,7 +37,7 @@ func (h RoomHandlers) WsRoom() HandlerAdapter {
 		roomIdStr := r.PathValue("roomId")
 		roomId, err := strconv.ParseInt(roomIdStr, 10, 64)
 		if err != nil {
-			return errors.New("400")
+			return errors.New("500")
 		}
 
 		_, err = h.manager.GetRoom(int(roomId))
@@ -122,10 +122,10 @@ func (h RoomHandlers) PostCreateRoom() HandlerAdapter {
 		name := r.PostFormValue("name")
 		accessStr := r.PostFormValue("access")
 
-		access, err := strconv.ParseInt(accessStr, 10, 32)
-		if err != nil {
-			return valid.NewValidationError("room access is not an integer")
+		if err := valid.Validate(accessStr, "room access", valid.AnInteger()); err != nil {
+			return err
 		}
+		access, _ := strconv.ParseInt(accessStr, 10, 64)
 
 		room := model.NewRoomDTO(name, int(access))
 		if err := room.Validate(); err != nil {
@@ -138,7 +138,7 @@ func (h RoomHandlers) PostCreateRoom() HandlerAdapter {
 		}
 
 		message := message{
-			Success:     "Room was created successfully",
+			Success:     GetLocale(r).GetOr("room-was-created", "Room was created successfully"),
 			RedirectURL: fmt.Sprintf("/room/%d", roomId),
 		}
 		return ExecuteView(MessageView, w, message)
@@ -158,17 +158,18 @@ func (h RoomHandlers) PutConnect() HandlerAdapter {
 
 	handler.AddHandler(func(w http.ResponseWriter, r *http.Request) error {
 		roomIdStr := r.PostFormValue("id")
-		roomId, err := strconv.ParseInt(roomIdStr, 10, 64)
-		if err != nil {
-			return valid.NewValidationError("room id must be an integer")
+
+		if err := valid.Validate(roomIdStr, "room id", valid.AnInteger()); err != nil {
+			return err
 		}
+		roomId, _ := strconv.ParseInt(roomIdStr, 10, 64)
 
 		if _, err := h.manager.GetRoom(int(roomId)); err != nil {
 			return err
 		}
 
 		message := message{
-			Success:     "Room was found successfully",
+			Success:     GetLocale(r).GetOr("room-was-found", "Room was found successfully"),
 			RedirectURL: fmt.Sprintf("/room/%d", roomId),
 		}
 		return ExecuteView(MessageView, w, message)

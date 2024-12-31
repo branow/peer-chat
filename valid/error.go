@@ -1,5 +1,10 @@
 package valid
 
+import (
+	"fmt"
+	"strings"
+)
+
 type ValidationError struct {
 	Message string
 	Field   string
@@ -10,8 +15,24 @@ func NewValidationError(message string) *ValidationError {
 }
 
 func (e ValidationError) Error() string {
-	if e.Field == "" {
-		return e.Message
+	message := e.Message
+	if e.Field != "" {
+		message = e.Field + " " + message
 	}
-	return e.Field + " " + e.Message
+	return message
+}
+
+func (e ValidationError) GetI18NKey() string {
+	key := toI18NKey(e.Message)
+	if e.Field != "" {
+		return fmt.Sprintf("{%s} {%s}", toI18NKey(e.Field), key)
+	}
+	return key
+}
+
+func toI18NKey(str string) string {
+	str = strings.TrimSpace(str)
+	str = strings.ToLower(str)
+	str = strings.ReplaceAll(str, " ", "-")
+	return str
 }

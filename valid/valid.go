@@ -2,6 +2,7 @@ package valid
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -47,6 +48,14 @@ func NotLongerThan(value int, messages ...string) Constraint[string] {
 func NotShorterThan(value int, messages ...string) Constraint[string] {
 	check := func(s string) bool { return len(s) < value }
 	return makeConstraint(check, "is too short", messages...)
+}
+
+func AnInteger(message ...string) Constraint[string] {
+	check := func(s string) bool {
+		_, err := strconv.ParseInt(s, 10, 64)
+		return err != nil
+	}
+	return makeConstraint(check, "must be an integer", message...)
 }
 
 func makeConstraint[T any](check func(T) bool, defaultMessage string, messages ...string) Constraint[T] {

@@ -1,0 +1,18 @@
+{
+  "error-500-title": "Internal Server Error",
+  "error-500-message": "Oops, something went wrong. Try refreshing the page or contact us if the problem persists.",
+  "error-404-title": "Page Not Found",
+  "error-404-message": "The page you are looking for might have been removed, renamed, or is temporarily unavailable.",
+  "error-400-title": "Bad Request",
+  "room-already-exists": "The room already exists.",
+  "room-does-not-exist": "The room does not exist.",
+  "is-mandatory": "is mandatory",
+  "is-too-long": "is too long",
+  "is-too-short": "is too short",
+  "must-be-an-integer": "must be an integer",
+  "room-access": "Room access",
+  "room-id": "Room ID",
+  "room-name": "Room name",
+  "room-was-created": "The room was created successfully.",
+  "room-was-found": "The room was found successfully."
+}
