@@ -1,43 +1,38 @@
 package main
 
 import (
+	"flag"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/branow/peer-chat/handlers"
-	"github.com/branow/peer-chat/model"
-	"golang.org/x/net/websocket"
 )
 
 func main() {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	if err := start(); err != nil {
+
+	port := flag.Uint("p", 8080, "Server port")
+	flag.Parse()
+
+	if err := start(*port); err != nil {
 		panic(err)
 	}
 }
 
-func start() error {
-	server := NewServer()
+func start(port uint) error {
+	server := NewServer(port)
 	slog.Info("Server started", "addr", server.Addr)
 	return server.ListenAndServe()
 }
 
-func NewServer() *http.Server {
+func NewServer(port uint) *http.Server {
 	mux := &http.ServeMux{}
 	handlers.HandleServeMux(mux)
 
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + strconv.Itoa(int(port)),
 		Handler: mux,
 	}
 	return server
-}
-
-func HandleSignalingServer(mux *http.ServeMux) {
-	peerConn := model.NewPeerConnection()
-	mux.Handle("/ws/", websocket.Handler(func(c *websocket.Conn) {
-		client := model.NewClient(c)
-		peerConn.AddClient(client)
-		client.Wait()
-	}))
 }
