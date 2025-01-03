@@ -8,7 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"golang.org/x/net/websocket"
+	"github.com/gorilla/websocket"
 )
 
 var ErrClientIsClosed = errors.New("client is closed")
@@ -80,26 +80,19 @@ func (c *Client) readMessages() {
 		c.close()
 	}()
 
-	// WebSocket conenction limit each read operation to 4088 bytes.
-	// Longer messages, the algorithm appends subsequent reads to a buffer
-	// until the entrie message is received.
-	bufSize := 4088
-	buf := make([]byte, bufSize)
-outer:
 	for {
-		data := []byte{}
-		hasNext := true
-		for hasNext {
-			n, err := c.connection.Read(buf)
-			if err != nil {
-				if err != io.EOF {
-					slog.Error("Client read:", "client-id", c.id, "error", err)
-				}
-				break outer
-			}
-			data = append(data, buf[:n]...)
-			hasNext = n == bufSize
+		_, r, err := c.connection.NextReader()
+		if err != nil {
+			slog.Error("Client read:", "client-id", c.id, "error", err)
+			break
 		}
+
+		data, err := io.ReadAll(r)
+		if err != nil {
+			slog.Error("Client read:", "client-id", c.id, "error", err)
+			break
+		}
+
 		c.in <- data
 	}
 }
@@ -113,7 +106,7 @@ func (c *Client) writeMessages() {
 	}()
 
 	for data := range c.out {
-		if _, err := c.connection.Write(data); err != nil {
+		if err := c.connection.WriteMessage(websocket.TextMessage, data); err != nil {
 			slog.Error("Client write:", "client-id", c.id, "error", err)
 			break
 		}

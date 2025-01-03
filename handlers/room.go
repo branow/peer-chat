@@ -10,8 +10,14 @@ import (
 
 	"github.com/branow/peer-chat/model"
 	"github.com/branow/peer-chat/valid"
-	"golang.org/x/net/websocket"
+	"github.com/gorilla/websocket"
 )
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024 * 8,
+	WriteBufferSize: 1024 * 8,
+	CheckOrigin:     func(r *http.Request) bool { return true },
+}
 
 type RoomHandlers struct {
 	manager *model.RoomManager
@@ -45,11 +51,14 @@ func (h RoomHandlers) WsRoom() HandlerAdapter {
 			return err
 		}
 
-		websocket.Handler(func(c *websocket.Conn) {
-			client := model.NewClient(c)
-			_ = h.manager.AddClient(int(roomId), client)
-			client.Wait()
-		}).ServeHTTP(w, r)
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			return err
+		}
+
+		client := model.NewClient(conn)
+		_ = h.manager.AddClient(int(roomId), client)
+		client.Wait()
 
 		return err
 	})
