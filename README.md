@@ -38,4 +38,4 @@ Check out the live demo here: [Website Demo](https://peerchat.top/)
 
 ## License
 
-This project is licensed under the terms of the [MIT license](https://github.com/branow/peer-chat/blob/main/LICENSE.txt).
+This project is licensed under the terms of the [MIT license](https://github.com/branow/peer-chat/blob/main/LICENSE).
