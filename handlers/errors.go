@@ -86,7 +86,7 @@ func handleErrorMessage(newErrorModel newErrorModel) HandleError {
 		slog.Debug("Error Response", "status", errModel.Status, "url", r.URL, "error", errModel.Cause)
 
 		messageModel := message{Error: errModel.Message}
-		if err := ExecuteView(MessageView, w, messageModel); err != nil {
+		if err := vr.ExecuteView(MessageView, w, messageModel); err != nil {
 			logError(errModel.Status, r.URL.String(), err)
 		}
 	}
@@ -100,13 +100,13 @@ func handleErrorPage(newErrorModel newErrorModel) HandleError {
 		slog.Debug("Error Response", "status", errModel.Status, "url", r.URL, "error", errModel.Cause)
 
 		buf := bytes.NewBufferString("")
-		if err := ExecuteView(ErrorView, buf, errModel); err != nil {
+		if err := vr.ExecuteView(ErrorView, buf, errModel); err != nil {
 			logError(errModel.Status, r.URL.String(), err)
 		}
 
 		errorHtml := template.HTML(buf.String())
 		model := templateModel{Content: errorHtml}
-		if err := ExecuteView(TemplateView, w, model); err != nil {
+		if err := vr.ExecuteView(TemplateView, w, model); err != nil {
 			logError(errModel.Status, r.URL.String(), err)
 		}
 	}
@@ -117,7 +117,7 @@ func handleError(newErrorModel newErrorModel) HandleError {
 		errModel := newErrorModel(err)
 		errModel.localize(GetLocale(r))
 		slog.Debug("Error Response", "status", errModel.Status, "url", r.URL, "error", errModel.Cause)
-		if err := ExecuteView(ErrorView, w, errModel); err != nil {
+		if err := vr.ExecuteView(ErrorView, w, errModel); err != nil {
 			logError(errModel.Status, r.URL.String(), err)
 		}
 	}

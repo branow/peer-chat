@@ -17,6 +17,20 @@ func HandleServeMux(mux *http.ServeMux) {
 	NewRoomHandlers().HandleServeMux(mux)
 }
 
+const (
+	TemplateView = "template"
+	RoomView     = "room"
+	HomeView     = "home"
+	RoomInfoView = "room-info"
+	RoomListView = "room-list"
+	MessageView  = "message"
+	ErrorView    = "error"
+)
+
+const DefaultViewDir = "./web/templates"
+
+var vr = NewViewResolver(DefaultViewDir)
+
 type templateModel struct {
 	Content template.HTML
 	Secured bool
@@ -31,13 +45,13 @@ func GetHomePage() HandlerAdapter {
 		}
 
 		buf := bytes.NewBufferString("")
-		if err := ExecuteView(HomeView, buf, struct{}{}); err != nil {
+		if err := vr.ExecuteView(HomeView, buf, struct{}{}); err != nil {
 			return err
 		}
 
 		homeHtml := buf.String()
-		model := templateModel{Content: template.HTML(homeHtml), Secured: config.GetConfing().Secured()}
-		return ExecuteView(TemplateView, w, model)
+		model := templateModel{Content: template.HTML(homeHtml), Secured: config.GetConfig().Secured()}
+		return vr.ExecuteView(TemplateView, w, model)
 	})
 
 	handler.AddErrorHandler(func(err error) bool { return err.Error() == "404" }, handleErrorPage(newError404))

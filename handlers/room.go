@@ -10,7 +10,7 @@ import (
 
 	"github.com/branow/peer-chat/config"
 	"github.com/branow/peer-chat/model"
-	"github.com/branow/peer-chat/valid"
+	"github.com/branow/peer-chat/validation"
 	"github.com/gorilla/websocket"
 )
 
@@ -61,7 +61,7 @@ func (h RoomHandlers) WsRoom() HandlerAdapter {
 		_ = h.manager.AddClient(int(roomId), client)
 		client.Wait()
 
-		return err
+		return nil
 	})
 
 	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorMessage(newError500))
@@ -84,13 +84,13 @@ func (h RoomHandlers) GetRoomPage() HandlerAdapter {
 		}
 
 		buf := bytes.NewBufferString("")
-		if err := ExecuteView(RoomView, buf, roomInfo); err != nil {
+		if err := vr.ExecuteView(RoomView, buf, roomInfo); err != nil {
 			return err
 		}
 
 		roomHtml := buf.String()
-		model := templateModel{Content: template.HTML(roomHtml), Secured: config.GetConfing().Secured()}
-		return ExecuteView(TemplateView, w, model)
+		model := templateModel{Content: template.HTML(roomHtml), Secured: config.GetConfig().Secured()}
+		return vr.ExecuteView(TemplateView, w, model)
 	})
 
 	handler.AddErrorHandler(func(err error) bool { return err.Error() == "404" }, handleErrorPage(newError404))
@@ -102,7 +102,7 @@ func (h RoomHandlers) GetRoomPage() HandlerAdapter {
 func (h RoomHandlers) GetRoomList() HandlerAdapter {
 	handler := NewHandlerAdapter("GET /x/rooms")
 	handler.AddHandler(func(w http.ResponseWriter, r *http.Request) error {
-		roomTmpl, err := FindView(RoomInfoView)
+		roomTmpl, err := vr.FindView(RoomInfoView)
 		if err != nil {
 			return err
 		}
@@ -119,7 +119,7 @@ func (h RoomHandlers) GetRoomList() HandlerAdapter {
 		}
 
 		model := struct{ Rooms []template.HTML }{Rooms: roomsHtml}
-		return ExecuteView(RoomListView, w, model)
+		return vr.ExecuteView(RoomListView, w, model)
 	})
 	handler.AddErrorHandler(func(err error) bool { return true }, handleError(newError500))
 	return *handler
@@ -132,7 +132,7 @@ func (h RoomHandlers) PostCreateRoom() HandlerAdapter {
 		name := r.PostFormValue("name")
 		accessStr := r.PostFormValue("access")
 
-		if err := valid.Validate(accessStr, "room access", valid.AnInteger()); err != nil {
+		if err := validation.Validate(accessStr, "room access", validation.AnInteger()); err != nil {
 			return err
 		}
 		access, _ := strconv.ParseInt(accessStr, 10, 64)
@@ -151,11 +151,11 @@ func (h RoomHandlers) PostCreateRoom() HandlerAdapter {
 			Success:     GetLocale(r).GetOr("room-was-created", "Room was created successfully"),
 			RedirectURL: fmt.Sprintf("/room/%d", roomId),
 		}
-		return ExecuteView(MessageView, w, message)
+		return vr.ExecuteView(MessageView, w, message)
 	})
 
 	handler.AddErrorHandler(func(err error) bool {
-		var validErr *valid.ValidationError
+		var validErr *validation.ValidationError
 		return errors.As(err, &validErr) || errors.Is(err, model.ErrRoomAlreadyExists)
 	}, handleErrorMessage(newError400))
 	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorMessage(newError500))
@@ -169,7 +169,7 @@ func (h RoomHandlers) PutConnect() HandlerAdapter {
 	handler.AddHandler(func(w http.ResponseWriter, r *http.Request) error {
 		roomIdStr := r.PostFormValue("id")
 
-		if err := valid.Validate(roomIdStr, "room id", valid.AnInteger()); err != nil {
+		if err := validation.Validate(roomIdStr, "room id", validation.AnInteger()); err != nil {
 			return err
 		}
 		roomId, _ := strconv.ParseInt(roomIdStr, 10, 64)
@@ -182,11 +182,11 @@ func (h RoomHandlers) PutConnect() HandlerAdapter {
 			Success:     GetLocale(r).GetOr("room-was-found", "Room was found successfully"),
 			RedirectURL: fmt.Sprintf("/room/%d", roomId),
 		}
-		return ExecuteView(MessageView, w, message)
+		return vr.ExecuteView(MessageView, w, message)
 	})
 
 	handler.AddErrorHandler(func(err error) bool {
-		var validErr *valid.ValidationError
+		var validErr *validation.ValidationError
 		return errors.As(err, &validErr) || errors.Is(err, model.ErrRoomDoesNotExist)
 	}, handleErrorMessage(newError400))
 	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorMessage(newError500))
