@@ -1,27 +1,24 @@
 package main
 
 import (
-	"flag"
 	"log/slog"
 	"net/http"
 	"strconv"
 
+	"github.com/branow/peer-chat/config"
 	"github.com/branow/peer-chat/handlers"
 )
 
 func main() {
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	slog.SetLogLoggerLevel(slog.Level(config.GetConfing().LogLevel()))
 
-	port := flag.Uint("p", 8080, "Server port")
-	flag.Parse()
-
-	if err := start(*port); err != nil {
+	if err := start(); err != nil {
 		panic(err)
 	}
 }
 
-func start(port uint) error {
-	server := NewServer(port)
+func start() error {
+	server := NewServer(config.GetConfing().Port())
 	slog.Info("Server started", "addr", server.Addr)
 	return server.ListenAndServe()
 }

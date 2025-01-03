@@ -7,11 +7,12 @@ const peerConnectionConfig = {
       urls: ['stun:stun0.l.google.com:19302', 'stun:stun2.l.google.com:19302']
     }
   ]
-}
+};
 
-const hostname = window.location.hostname
-const port = window.location.port
-const URL = `ws://${hostname}:${port}/ws/room/${room.id}`
+const hostname = window.location.hostname;
+const port = window.location.port;
+const protocol = secured ? 'wss' : 'ws';
+const URL = `${protocol}://${hostname}:${port}/ws/room/${room.id}`;
 
 class Page {
   constructor() {

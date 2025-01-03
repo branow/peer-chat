@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/branow/peer-chat/config"
 	"github.com/branow/peer-chat/model"
 	"github.com/branow/peer-chat/valid"
 	"github.com/gorilla/websocket"
@@ -88,7 +89,7 @@ func (h RoomHandlers) GetRoomPage() HandlerAdapter {
 		}
 
 		roomHtml := buf.String()
-		model := templateModel{Content: template.HTML(roomHtml)}
+		model := templateModel{Content: template.HTML(roomHtml), Secured: config.GetConfing().Secured()}
 		return ExecuteView(TemplateView, w, model)
 	})
 

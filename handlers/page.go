@@ -6,6 +6,8 @@ import (
 	"html/template"
 	"net/http"
 	"slices"
+
+	"github.com/branow/peer-chat/config"
 )
 
 func HandleServeMux(mux *http.ServeMux) {
@@ -17,6 +19,7 @@ func HandleServeMux(mux *http.ServeMux) {
 
 type templateModel struct {
 	Content template.HTML
+	Secured bool
 }
 
 func GetHomePage() HandlerAdapter {
@@ -33,7 +36,7 @@ func GetHomePage() HandlerAdapter {
 		}
 
 		homeHtml := buf.String()
-		model := templateModel{Content: template.HTML(homeHtml)}
+		model := templateModel{Content: template.HTML(homeHtml), Secured: config.GetConfing().Secured()}
 		return ExecuteView(TemplateView, w, model)
 	})
 
