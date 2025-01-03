@@ -73,7 +73,7 @@ func newError400(err error) errorModel {
 		Cause:   err.Error(),
 		localizationKeys: map[string]string{
 			"Title":   "error-400-title",
-			"Message": ResolveI18NKeyOfError(err),
+			"Message": i18n.ResolveI18NKeyOfError(err),
 		},
 	}
 }
