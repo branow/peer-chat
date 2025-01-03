@@ -4,7 +4,11 @@ This project is a simple website for free peer-to-peer internet call communicati
 
 ## Demo
 
-Check out the live demo here: [Website Demo](#https://peerchat.top/)
+Check out the live demo here: [Website Demo](https://peerchat.top/)
+
+<p align="center">
+  <img alt="Using Run function" src="https://raw.githubusercontent.com/branow/peer-chat/main/screenshot.png">
+</p>
 
 ## Features
 
@@ -30,3 +34,8 @@ Check out the live demo here: [Website Demo](#https://peerchat.top/)
 * ```go build ```
 * ```peer-chat.exe -s=false``` // windows
 * ```./peer-chat -s=false``` // linux
+
+
+## License
+
+This project is licensed under the terms of the [MIT license](https://github.com/branow/peer-chat/blob/main/LICENSE.txt).
