@@ -5,15 +5,16 @@ import (
 	"strings"
 )
 
-var ErrIvalidNumberOfValues = errors.New("invalid number of values")
+var ErrInvalidNumberOfValues = errors.New("invalid number of values")
 
-// Can only split and concatinates values, for example:
-// "and {key1} >= {key2}" => "and value1 >= value2"
+// I18NKeyProcessor is responsible for processing a template string
+// and replacing placeholders (e.g. {key}) with corresponding values.
 type I18NKeyProcessor struct {
 	template string
 	values   []string
 }
 
+// NewI18NKeyProcessor creates a new processor for a given template.
 func NewI18NKeyProcessor(template string) *I18NKeyProcessor {
 	return &I18NKeyProcessor{
 		template: template,
@@ -21,6 +22,9 @@ func NewI18NKeyProcessor(template string) *I18NKeyProcessor {
 	}
 }
 
+// GetKeys extracts the keys (placeholders) from the template string.
+// It searches for substrings enclosed in curly braces, such as {key1}.
+// If no placeholders are found, it returns the template as a stingle key.
 func (p I18NKeyProcessor) GetKeys() []string {
 	if strings.ContainsAny(p.template, "{}") {
 		return process(p.template)
@@ -28,14 +32,17 @@ func (p I18NKeyProcessor) GetKeys() []string {
 	return []string{p.template}
 }
 
+// SetValues sets the values that will replace the placeholders in the template.
 func (p *I18NKeyProcessor) SetValues(values ...string) {
 	p.values = values
 }
 
+// String processes the template by replacing the keys with the corresponding values.
+// It returns an error if the number of values does not mathc the number of keys.
 func (p I18NKeyProcessor) String() (string, error) {
 	keys := p.GetKeys()
 	if len(keys) != len(p.values) {
-		return "", ErrIvalidNumberOfValues
+		return "", ErrInvalidNumberOfValues
 	}
 	keysValues := map[string]string{}
 	for i, key := range keys {

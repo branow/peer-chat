@@ -14,12 +14,14 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// WebSocket upgrader to handle WebSocket connections.
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024 * 8,
 	WriteBufferSize: 1024 * 8,
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
+// RoomHandlers manages handlers related to chat rooms.
 type RoomHandlers struct {
 	manager *model.RoomManager
 }
@@ -30,6 +32,7 @@ func NewRoomHandlers() *RoomHandlers {
 	}
 }
 
+// HandleServeMux registers all the routes handled by RoomHandlers.
 func (h RoomHandlers) HandleServeMux(mux *http.ServeMux) {
 	h.WsRoom().ServeMux(mux)
 	h.GetRoomPage().ServeMux(mux)
@@ -40,23 +43,27 @@ func (h RoomHandlers) HandleServeMux(mux *http.ServeMux) {
 
 func (h RoomHandlers) WsRoom() HandlerAdapter {
 	handler := NewHandlerAdapter("GET /ws/room/{roomId}")
+
 	handler.AddHandler(func(w http.ResponseWriter, r *http.Request) error {
 		roomIdStr := r.PathValue("roomId")
 		roomId, err := strconv.ParseInt(roomIdStr, 10, 64)
 		if err != nil {
-			return errors.New("500")
+			return errInternalServer
 		}
 
+		// Check if the room exits.
 		_, err = h.manager.GetRoom(int(roomId))
 		if err != nil {
 			return err
 		}
 
+		// Upgrade HTTP connection to WebSocket.
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			return err
 		}
 
+		// Add client to the room and wait for interaction.
 		client := model.NewClient(conn)
 		_ = h.manager.AddClient(int(roomId), client)
 		client.Wait()
@@ -64,7 +71,10 @@ func (h RoomHandlers) WsRoom() HandlerAdapter {
 		return nil
 	})
 
-	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorMessage(newError500))
+	handler.AddErrorHandler(
+		func(err error) bool { return true },
+		handleErrorMessage(newError500),
+	)
 	return *handler
 }
 
@@ -75,7 +85,7 @@ func (h RoomHandlers) GetRoomPage() HandlerAdapter {
 		roomIdStr := r.PathValue("roomId")
 		roomId, err := strconv.ParseInt(roomIdStr, 10, 64)
 		if err != nil {
-			return errors.New("404")
+			return errNotFound
 		}
 
 		roomInfo, err := h.manager.GetRoom(int(roomId))
@@ -93,20 +103,32 @@ func (h RoomHandlers) GetRoomPage() HandlerAdapter {
 		return vr.ExecuteView(TemplateView, w, model)
 	})
 
-	handler.AddErrorHandler(func(err error) bool { return err.Error() == "404" }, handleErrorPage(newError404))
-	handler.AddErrorHandler(func(err error) bool { return errors.Is(err, model.ErrRoomDoesNotExist) }, handleErrorPage(newError404))
-	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorPage(newError500))
+	handler.AddErrorHandler(
+		func(err error) bool { return err == errNotFound },
+		handleErrorPage(newError404),
+	)
+	handler.AddErrorHandler(
+		func(err error) bool { return errors.Is(err, model.ErrRoomDoesNotExist) },
+		handleErrorPage(newError404),
+	)
+	handler.AddErrorHandler(
+		func(err error) bool { return true },
+		handleErrorPage(newError500),
+	)
 	return *handler
 }
 
 func (h RoomHandlers) GetRoomList() HandlerAdapter {
 	handler := NewHandlerAdapter("GET /x/rooms")
+
 	handler.AddHandler(func(w http.ResponseWriter, r *http.Request) error {
+		// Fetch the template for individual room info.
 		roomTmpl, err := vr.FindView(RoomInfoView)
 		if err != nil {
 			return err
 		}
 
+		// Fetch public rooms and render each to HTML.
 		rooms := h.manager.GetPublicRooms()
 		roomsHtml := []template.HTML{}
 		for _, room := range rooms {
@@ -118,10 +140,15 @@ func (h RoomHandlers) GetRoomList() HandlerAdapter {
 			roomsHtml = append(roomsHtml, template.HTML(buf.String()))
 		}
 
+		// Render the room list view.
 		model := struct{ Rooms []template.HTML }{Rooms: roomsHtml}
 		return vr.ExecuteView(RoomListView, w, model)
 	})
-	handler.AddErrorHandler(func(err error) bool { return true }, handleError(newError500))
+
+	handler.AddErrorHandler(
+		func(err error) bool { return true },
+		handleError(newError500),
+	)
 	return *handler
 }
 
@@ -154,11 +181,17 @@ func (h RoomHandlers) PostCreateRoom() HandlerAdapter {
 		return vr.ExecuteView(MessageView, w, message)
 	})
 
-	handler.AddErrorHandler(func(err error) bool {
-		var validErr *validation.ValidationError
-		return errors.As(err, &validErr) || errors.Is(err, model.ErrRoomAlreadyExists)
-	}, handleErrorMessage(newError400))
-	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorMessage(newError500))
+	handler.AddErrorHandler(
+		func(err error) bool {
+			var validErr *validation.ValidationError
+			return errors.As(err, &validErr) || errors.Is(err, model.ErrRoomAlreadyExists)
+		},
+		handleErrorMessage(newError400),
+	)
+	handler.AddErrorHandler(
+		func(err error) bool { return true },
+		handleErrorMessage(newError500),
+	)
 
 	return *handler
 }
@@ -185,11 +218,17 @@ func (h RoomHandlers) PutConnect() HandlerAdapter {
 		return vr.ExecuteView(MessageView, w, message)
 	})
 
-	handler.AddErrorHandler(func(err error) bool {
-		var validErr *validation.ValidationError
-		return errors.As(err, &validErr) || errors.Is(err, model.ErrRoomDoesNotExist)
-	}, handleErrorMessage(newError400))
-	handler.AddErrorHandler(func(err error) bool { return true }, handleErrorMessage(newError500))
+	handler.AddErrorHandler(
+		func(err error) bool {
+			var validErr *validation.ValidationError
+			return errors.As(err, &validErr) || errors.Is(err, model.ErrRoomDoesNotExist)
+		},
+		handleErrorMessage(newError400),
+	)
+	handler.AddErrorHandler(
+		func(err error) bool { return true },
+		handleErrorMessage(newError500),
+	)
 
 	return *handler
 }

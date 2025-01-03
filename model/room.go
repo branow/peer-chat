@@ -3,11 +3,11 @@ package model
 import (
 	"errors"
 	"log/slog"
-	"slices"
+	"sort"
 	"sync"
 	"time"
 
-	"github.com/branow/peer-chat/valid"
+	"github.com/branow/peer-chat/validation"
 )
 
 var (
@@ -15,6 +15,7 @@ var (
 	ErrRoomDoesNotExist  = errors.New("room does not exist")
 )
 
+// RoomManager holdes and manages peer-to-peer connections.
 type RoomManager struct {
 	rooms map[int]*room
 	mutex sync.RWMutex
@@ -52,12 +53,9 @@ func (m *RoomManager) GetPublicRooms() []RoomInfo {
 			rooms = append(rooms, *newRoomInfo(*room))
 		}
 	}
-	// Sort rooms by creation date
-	slices.SortFunc(rooms, func(r1, r2 RoomInfo) int {
-		if r1.CreationTime.After(r2.CreationTime) {
-			return -1
-		}
-		return 1
+	// Sort rooms by creation date, newest first
+	sort.Slice(rooms, func(i, j int) bool {
+		return rooms[i].CreationTime.After(rooms[j].CreationTime)
 	})
 	return rooms
 }
@@ -75,6 +73,7 @@ func (m *RoomManager) CreateRoom(dto RoomDTO) (int, error) {
 	room := newRoom(dto.name, dto.access)
 	room.SetOnEmptyConnection(func() { m.removeRoom(room.id) })
 	m.rooms[room.Id()] = room
+	slog.Info("Created room:", "room-id", room.Id())
 	return room.Id(), nil
 }
 
@@ -83,7 +82,7 @@ func (m *RoomManager) removeRoom(roomId int) {
 	defer m.mutex.Unlock()
 
 	delete(m.rooms, roomId)
-	slog.Debug("Remove room", "room-id", roomId)
+	slog.Info("Removed room:", "room-id", roomId)
 }
 
 func (m *RoomManager) AddClient(roomId int, client *Client) error {
@@ -101,6 +100,7 @@ const (
 	public
 )
 
+// RoomDTO represents data required to create a room.
 type RoomDTO struct {
 	name   string
 	access int
@@ -114,14 +114,14 @@ func NewRoomDTO(name string, access int) *RoomDTO {
 }
 
 func (r RoomDTO) Validate() error {
-	err := valid.Validate(r.name, "room name",
-		valid.NotBlank(),
-		valid.NotShorterThan(3),
-		valid.NotLongerThan(50))
+	err := validation.Validate(r.name, "room name",
+		validation.NotBlank(),
+		validation.NotShorterThan(3),
+		validation.NotLongerThan(50))
 	if err != nil {
 		return err
 	}
-	err = valid.Validate(r.access, "room access", valid.Equal([]int{public, private}))
+	err = validation.Validate(r.access, "room access", validation.Equal([]int{public, private}))
 	if err != nil {
 		return err
 	}
@@ -144,6 +144,7 @@ func newRoom(name string, access int) *room {
 	}
 }
 
+// RoomInfo represents public information about a room.
 type RoomInfo struct {
 	Id           int
 	Name         string

@@ -3,6 +3,7 @@ package handlers
 import (
 	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/branow/peer-chat/i18n"
@@ -19,20 +20,24 @@ func init() {
 	}
 }
 
+// GetLocalizor returns the initialized Localizor instance.
 func GetLocalizor() *i18n.Localizor {
 	return localizor
 }
 
+// GetLocale retrieves the best matching Locale for the request based on
+// the Accept-Language header.
 func GetLocale(r *http.Request) i18n.Locale {
-	langs := append(getAcceptLanuages(r), DefaultLang)
+	langs := append(getAcceptLanguages(r), DefaultLang)
 	locale, err := GetLocalizor().GetLocale(langs...)
 	if err != nil {
-		panic(err)
+		slog.Error("Get locale:", "error", err, "langs", langs)
+		os.Exit(1)
 	}
 	return locale
 }
 
-func getAcceptLanuages(r *http.Request) []string {
+func getAcceptLanguages(r *http.Request) []string {
 	header := r.Header.Get("Accept-Language")
 	locales := strings.Split(header, ",")
 

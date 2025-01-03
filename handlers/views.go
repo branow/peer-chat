@@ -8,6 +8,7 @@ import (
 	"sync"
 )
 
+// ViewResolver manages template rendering and caching.
 type ViewResolver struct {
 	dir           string
 	templateCache templates
@@ -66,6 +67,7 @@ func (r *ViewResolver) GetViewPath(name string) string {
 	return fmt.Sprintf("%s/%s.html", r.dir, safeName)
 }
 
+// templates provides a thread-safe map for caching templates.
 type templates struct {
 	sync.RWMutex
 	templates map[string]*template.Template

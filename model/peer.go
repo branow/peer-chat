@@ -79,12 +79,12 @@ func (c *PeerConnection) AddClient(client *Client) {
 		}
 	})
 	c.clients.AddClient(client)
-	slog.Debug("PeerConnection added client", "peer-coonnection", c.Id(),
+	slog.Debug("PeerConnection added client:", "peer-coonnection", c.Id(),
 		"client", client.Id())
 
 	if c.sender == nil || c.receiver == nil {
 		if err := c.signal(); err != nil {
-			slog.Error("Signaling on client add", "peer-connection", c.Id(),
+			slog.Error("Signaling on client add:", "peer-connection", c.Id(),
 				"client", client.Id(), "error", err)
 
 			message, _ := json.Marshal(message{MessageType: "error", Data: err.Error()})
@@ -93,7 +93,7 @@ func (c *PeerConnection) AddClient(client *Client) {
 	} else {
 		message, _ := json.Marshal(WaitForRoomMessage)
 		if err := client.Send(message); err != nil {
-			slog.Error("Sending client message", "peer-connection", c.Id(),
+			slog.Error("Sending client message:", "peer-connection", c.Id(),
 				"client", client.Id(), "error", err)
 		}
 	}
@@ -111,7 +111,7 @@ func (c *PeerConnection) signal() error {
 	}
 
 	c.sender, c.receiver = clients[0], clients[1]
-	slog.Debug("Starting signaling", "peer-connection", c.Id(),
+	slog.Debug("Starting signaling:", "peer-connection", c.Id(),
 		"sender", c.sender.Id(), "receiver", c.receiver.Id())
 
 	message, _ := json.Marshal(RequestOfferMessage)
@@ -137,7 +137,7 @@ func (c *PeerConnection) signal() error {
 		return err
 	}
 
-	slog.Debug("Finished signaling", "peer-connection", c.Id(),
+	slog.Debug("Finished signaling:", "peer-connection", c.Id(),
 		"sender", c.sender.Id(), "receiver", c.receiver.Id())
 	return nil
 }

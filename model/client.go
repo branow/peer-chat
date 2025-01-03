@@ -123,7 +123,7 @@ func (c *Client) start() {
 		defer c.wg.Done()
 		c.writeMessages()
 	}()
-	slog.Debug("Client started", "client-id", c.id)
+	slog.Debug("Client started:", "client-id", c.id)
 }
 
 // close safely closes WebSocket connection, invokes the onClose callback,
@@ -132,6 +132,6 @@ func (c *Client) close() {
 	if atomic.CompareAndSwapInt32(&c.isClosed, 0, 1) {
 		_ = c.connection.Close()
 		c.onClose()
-		slog.Debug("Client closed", "client-id", c.id)
+		slog.Debug("Client closed:", "client-id", c.id)
 	}
 }

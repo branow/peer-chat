@@ -7,8 +7,11 @@ import (
 	"strings"
 )
 
+// LocalizeTag is the struct tag used to specify which fields
+// should be localized.
 const LocalizeTag = "i18n"
 
+// Locale represents a language and its corresponding translations.
 type Locale struct {
 	lang        string
 	translation Translation
@@ -25,6 +28,9 @@ func (l Locale) Lang() string {
 	return l.lang
 }
 
+// Get retrieves the localized string for a given key.
+// If the key does not exists, an error is return.
+// It supports key procession by I18NKeyProcessor.
 func (l Locale) Get(key string) (string, error) {
 	if !strings.ContainsAny(key, "{}") {
 		key = "{" + key + "}"
@@ -52,6 +58,8 @@ func (l Locale) getWithProcess(key string) (string, error) {
 	return processor.String()
 }
 
+// GetOr retrieves the localized string for a key or returns
+// the default value if not found.
 func (l Locale) GetOr(key, defaultValue string) string {
 	if value, err := l.Get(key); err == nil {
 		return value
@@ -61,6 +69,11 @@ func (l Locale) GetOr(key, defaultValue string) string {
 
 type Setter func(string)
 
+// LocalizedFields localizes multiple fields by applying corresponding
+// translation to them. It finds the proper translation for the keys
+// of the given map and then transfer them as arguments into the map values
+// (setters functions). The method tries to localize as many fields as possible
+// accumulating errors and then return them.
 func (l Locale) LocalizeFields(setters map[string]Setter) error {
 	errs := []error{}
 	for key, setter := range setters {
@@ -75,6 +88,9 @@ func (l Locale) LocalizeFields(setters map[string]Setter) error {
 	return errors.Join(errs...)
 }
 
+// LocalizeStruct localizes all fields in a struct based on the struct tags.
+// It supports only fields of kind string. The method tries to localize
+// as many fields as possible accumulating errors and then return them.
 func (l Locale) LocalizeStruct(obj any) error {
 	ot := reflect.TypeOf(obj)
 	if ot == nil || ot.Kind() != reflect.Struct {

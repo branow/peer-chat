@@ -15,10 +15,19 @@ var (
 
 type Translation map[string]string
 
+// Localizor handles loading and managing translation
+// for multiple languages.
 type Localizor struct {
 	translations map[string]Translation
 }
 
+// NewLocalizor initializes a new Localizor instance
+// by reading translation files from the specified directory.
+// It processes all files it can, if any files cannot be processed
+// (e.g., due to errors in reading or parsing), those errors are
+// collected and returned.
+// File names must follow the pattern 'lang.json'
+// (for example: en.json, ua.json).
 func NewLocalizor(dir string) (*Localizor, error) {
 	localizor := Localizor{map[string]Translation{}}
 
@@ -38,6 +47,8 @@ func NewLocalizor(dir string) (*Localizor, error) {
 	return &localizor, errors.Join(errs...)
 }
 
+// GetLocale returns the locale for the first found language
+// or an error if none are found.
 func (l *Localizor) GetLocale(langs ...string) (Locale, error) {
 	for _, lang := range langs {
 		if translation, ok := l.translations[lang]; ok {
@@ -47,6 +58,7 @@ func (l *Localizor) GetLocale(langs ...string) (Locale, error) {
 	return Locale{}, ErrLanguageNotFound
 }
 
+// HasLanguage checks if a translation for a given langauge exists.
 func (l *Localizor) HasLanguage(lang string) bool {
 	_, ok := l.translations[lang]
 	return ok
@@ -84,6 +96,5 @@ func readTranslation(r io.Reader) (Translation, error) {
 
 func extractFilename(filepath string) string {
 	filename := path.Base(filepath)
-	lastIndex := strings.LastIndex(filename, path.Ext(filename))
-	return filename[:lastIndex]
+	return strings.TrimSuffix(filename, path.Ext(filename))
 }

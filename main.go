@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/branow/peer-chat/config"
@@ -10,20 +11,22 @@ import (
 )
 
 func main() {
-	slog.SetLogLoggerLevel(slog.Level(config.GetConfing().LogLevel()))
+	logLevel := slog.Level(config.GetConfig().LogLevel())
+	slog.SetLogLoggerLevel(logLevel)
 
 	if err := start(); err != nil {
-		panic(err)
+		slog.Error("Server startup failed:", "error", err)
+		os.Exit(1)
 	}
 }
 
 func start() error {
-	server := NewServer(config.GetConfing().Port())
-	slog.Info("Server started", "addr", server.Addr)
+	server := NewServer(config.GetConfig().Port())
+	slog.Info("Server started:", "addr", server.Addr)
 	return server.ListenAndServe()
 }
 
-func NewServer(port uint) *http.Server {
+func NewServer(port int) *http.Server {
 	mux := &http.ServeMux{}
 	handlers.HandleServeMux(mux)
 
