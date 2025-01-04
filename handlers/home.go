@@ -38,6 +38,7 @@ func HandleServeMux(mux *http.ServeMux) {
 
 	// Page handlers
 	GetHomePage().ServeMux(mux)
+	GetIcon().ServeMux(mux)
 	NewRoomHandlers().HandleServeMux(mux)
 }
 
@@ -45,6 +46,15 @@ func HandleServeMux(mux *http.ServeMux) {
 type templateModel struct {
 	Content template.HTML
 	Secured bool
+}
+
+func GetIcon() HandlerAdapter {
+	hander := NewHandlerAdapter("/favicon.ico")
+	hander.AddHandler(func(w http.ResponseWriter, r *http.Request) error {
+		http.Redirect(w, r, "/static/img/favicon.ico", http.StatusMovedPermanently)
+		return nil
+	})
+	return *hander
 }
 
 func GetHomePage() HandlerAdapter {
