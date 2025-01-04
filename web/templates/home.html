@@ -32,10 +32,17 @@
           placeholder="Type room name..."
         >
       </div>
-      <div class="room-list-container"
-        hx-get="/x/rooms"
-        hx-trigger="load"
-      ></div>
+      <div class="room-list-body">
+        <button 
+          class="usual-button bright-button refresh-btn" 
+          hx-get="/x/rooms"
+          hx-trigger="load, click"
+          hx-target=".room-list-container"
+        >
+          <img src="/static/img/reload.png">
+        </button>        
+        <div class="room-list-container"></div>
+      </div>
     </div>
   </div>
 
