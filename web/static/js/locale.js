@@ -25,7 +25,11 @@ class Locale {
   }
   
   translatePage() {
-    document.querySelectorAll(`[${this.attribute}]`)
+    this.translateElementTree(document)
+  }
+  
+  translateElementTree(root) {
+    root.querySelectorAll(`[${this.attribute}]`)
       .forEach(this.translateElement.bind(this));
 
     const fields = ['placeholder', 'value'];
@@ -80,6 +84,19 @@ class LocaleSwitcher {
 
 let locale;
 let localeSwitcher;
+
+document.addEventListener('htmx:afterSwap', (e) => {
+  const tryToTranslate = () => {
+    if (locale.translations !== null) {
+      locale.translateElementTree(e.target);
+    } else {
+      setTimeout(() => {
+        tryToTranslate()
+      }, 500);
+    }
+  }
+  tryToTranslate();
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   locale = new Locale("/static/lang");
