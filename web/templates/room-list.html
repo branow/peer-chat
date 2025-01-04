@@ -12,11 +12,10 @@
     {{ end }} 
   </div>
   <script>
-    const rooms = document.querySelectorAll(".room-list .room-info");
-    for (const room of rooms) {
+    for (const room of document.querySelectorAll(".room-list .room-info")) {
       const id = room.querySelector(".room-info-id").textContent;
       room.querySelector(".room-info-connect").addEventListener('click', () => {
-        window.location.href = `/room/${id}`
+        window.location.href = `/room/${id}`;
       });
     }
   </script>

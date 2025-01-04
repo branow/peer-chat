@@ -9,8 +9,9 @@
     <div class="room-info-name">
       {{ .Name }}
     </div>
-    <div class="room-info-clients" data-i18n="room-info-participants">
-      People: {{ .Clients }}
+    <div class="room-info-clients">
+      <span data-i18n="room-info-participants">People</span>
+      : {{ .Clients }}
     </div>
     {{ if ge .Clients 2 }}
     <div class="hint" data-i18n="room-info-hint">
