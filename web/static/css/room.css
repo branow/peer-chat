@@ -31,15 +31,9 @@
   }
 }
 
-@media screen and (max-width:850px) {
+@media screen and (max-width:768px) {
   .local {
     height: 25%;
-  }
-}
-
-@media screen and (max-width:680px) {
-  .local {
-    height: 20%;
   }
 }
 
@@ -121,6 +115,8 @@
   position: absolute;
   width: 100%;
   height: 100%;
+  padding: 10%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -151,6 +147,8 @@
   position: absolute;
   width: 100%;
   height: 100%;
+  padding: 10%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: center;

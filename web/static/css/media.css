@@ -1,0 +1,23 @@
+@media only screen and (max-width: 1280px) {
+.quick-start {
+  margin: 2vh 10vw;
+}
+.rooms {
+  padding: 5vh 10vw;
+}
+.text-input {
+  min-width: 300px;
+}
+}
+
+@media only screen and (max-width: 768px) {
+.quick-start {
+  margin: 2vh 5vw;
+}
+.rooms {
+  padding: 5vh 5vw;
+}
+.text-input {
+  min-width: 250px;
+}
+}
