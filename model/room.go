@@ -38,21 +38,18 @@ func (m *RoomManager) GetRoom(roomId int) (RoomInfo, error) {
 }
 
 func (m *RoomManager) GetPublicRooms() []RoomInfo {
+	m.removeEmptyRooms()
+
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
 	rooms := []RoomInfo{}
 	for _, room := range m.rooms {
-		// Check wheather the room is empty and remove it if so
-		if room.GetClients() == 0 {
-			m.removeRoom(room.id)
-			continue
-		}
-
 		if room.access == public {
 			rooms = append(rooms, *newRoomInfo(*room))
 		}
 	}
+
 	// Sort rooms by creation date, newest first
 	sort.Slice(rooms, func(i, j int) bool {
 		return rooms[i].CreationTime.After(rooms[j].CreationTime)
@@ -75,6 +72,20 @@ func (m *RoomManager) CreateRoom(dto RoomDTO) (int, error) {
 	m.rooms[room.Id()] = room
 	slog.Info("Created room:", "room-id", room.Id())
 	return room.Id(), nil
+}
+
+func (m *RoomManager) removeEmptyRooms() {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	for _, room := range m.rooms {
+		// Check wheather the room is empty and remove it if so
+		if room.GetClients() == 0 {
+			delete(m.rooms, room.Id())
+			slog.Info("Removed room as empty:", "room-id", room.Id())
+		}
+	}
+
 }
 
 func (m *RoomManager) removeRoom(roomId int) {
