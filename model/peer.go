@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type MessageType string
@@ -11,6 +12,7 @@ const (
 	Offer        = "offer"
 	Answer       = "answer"
 	Wait         = "wait"
+	Hold         = "hold"
 	Error        = "error"
 )
 
@@ -29,17 +31,22 @@ func NewPeer(c *Client) *Peer {
 }
 
 func (p *Peer) ReceiveExpected(messageType MessageType) (Message, error) {
-	message, err := p.ReceiveMessage()
-	if err != nil {
-		return message, err
-	}
-	if message.MessageType != string(messageType) {
-		return Message{}, UnexpectedMessageTypeError{
-			ExpectedType:    messageType,
-			ReceivedMessage: message,
+	for {
+		message, err := p.ReceiveMessage()
+		if err != nil {
+			return message, err
 		}
+		if message.MessageType == Hold {
+			continue
+		}
+		if message.MessageType != string(messageType) {
+			return Message{}, UnexpectedMessageTypeError{
+				ExpectedType:    messageType,
+				ReceivedMessage: message,
+			}
+		}
+		return message, nil
 	}
-	return message, nil
 }
 
 func (p *Peer) ReceiveMessage() (Message, error) {
@@ -65,7 +72,8 @@ type UnexpectedMessageTypeError struct {
 }
 
 func (e UnexpectedMessageTypeError) Error() string {
-	return "receive unexpected message type"
+	return fmt.Sprintf("receive unexpected message type: '%v' instead of '%v'",
+		e.ExpectedType, e.ReceivedMessage.MessageType)
 }
 
 type IllegalMessageError struct {
@@ -74,5 +82,5 @@ type IllegalMessageError struct {
 }
 
 func (e IllegalMessageError) Error() string {
-	return "receive illegal message"
+	return "receive illegal message: " + e.Cause.Error()
 }

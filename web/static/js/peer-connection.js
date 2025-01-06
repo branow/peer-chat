@@ -1,6 +1,5 @@
-
 export class PeerConnection {
-  constructor(connectionConfig, localStream, remoteStream){
+  constructor(connectionConfig, localStream, remoteStream) {
     this.connectionConfig = connectionConfig;
     this.localStream = localStream;
     this.remoteStream = remoteStream;
@@ -8,8 +7,10 @@ export class PeerConnection {
   }
 
   _createConnection() {
-    if (this.peerConnection) { this.peerConnection.close(); }
-    
+    if (this.peerConnection) {
+      this.peerConnection.close();
+    }
+
     this.peerConnection = new RTCPeerConnection(this.connectionConfig);
 
     this.remoteStream.getTracks().forEach((track) => {
@@ -21,7 +22,7 @@ export class PeerConnection {
       event.streams[0].getTracks().forEach((track) => {
         this.remoteStream.addTrack(track);
       });
-    }
+    };
 
     this.localStream.getTracks().forEach((track) => {
       this.peerConnection.addTrack(track, this.localStream);
@@ -36,11 +37,11 @@ export class PeerConnection {
         if (event.candidate) {
           resolve();
         }
-      }
+      };
     });
-    
+
     const offer = await this.peerConnection.createOffer();
-    await this.peerConnection.setLocalDescription(offer); 
+    await this.peerConnection.setLocalDescription(offer);
 
     await iceCandidatePromise;
 
@@ -55,7 +56,7 @@ export class PeerConnection {
         if (event.candidate) {
           resolve();
         }
-      }
+      };
     });
 
     await this.peerConnection.setRemoteDescription(offer);
