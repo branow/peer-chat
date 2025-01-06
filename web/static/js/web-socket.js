@@ -51,7 +51,6 @@ export class PeerChatWebsocket {
   hold() {
     if (!this.holdIntervalId) {
       this.holdIntervalId = setInterval(() => {
-        console.log("send hold");
         this.websocket.send(JSON.stringify(HoldMessage));
       }, this.holdInterval);
     }
@@ -60,6 +59,7 @@ export class PeerChatWebsocket {
   unhold() {
     if (this.holdIntervalId) {
       clearInterval(this.holdIntervalId);
+      this.holdIntervalId = 0;
     }
   }
 
