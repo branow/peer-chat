@@ -4,6 +4,7 @@ export class PeerConnection {
     this.localStream = localStream;
     this.remoteStream = remoteStream;
     this.peerConnection = null;
+    this.iceCandidateTimeout = 2 * 1000; // milliseconds
   }
 
   _createConnection() {
@@ -32,13 +33,7 @@ export class PeerConnection {
   async createOffer() {
     this._createConnection();
 
-    const iceCandidatePromise = new Promise((resolve) => {
-      this.peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-          resolve();
-        }
-      };
-    });
+    const iceCandidatePromise = this.waitIceCandidates();
 
     const offer = await this.peerConnection.createOffer();
     await this.peerConnection.setLocalDescription(offer);
@@ -51,13 +46,7 @@ export class PeerConnection {
   async createAnswer(offer) {
     this._createConnection();
 
-    const iceCandidatePromise = new Promise((resolve) => {
-      this.peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-          resolve();
-        }
-      };
-    });
+    const iceCandidatePromise = this.waitIceCandidates();
 
     await this.peerConnection.setRemoteDescription(offer);
     const answer = await this.peerConnection.createAnswer();
@@ -66,6 +55,24 @@ export class PeerConnection {
     await iceCandidatePromise;
 
     return this.peerConnection.localDescription;
+  }
+
+  async waitIceCandidates() {
+    let icIsAdded = false;
+    this.peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        console.log("candidate");
+        icIsAdded = true;
+      }
+    };
+    return new Promise((resolve) => {
+      const intervalId = setInterval(() => {
+        if (icIsAdded) {
+          resolve();
+          clearInterval(intervalId);
+        }
+      }, this.iceCandidateTimeout);
+    });
   }
 
   async addAnswer(answer) {
