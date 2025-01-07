@@ -61,7 +61,6 @@ export class PeerConnection {
     let icIsAdded = false;
     this.peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log("candidate");
         icIsAdded = true;
       }
     };

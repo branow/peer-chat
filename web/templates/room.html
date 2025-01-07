@@ -6,7 +6,7 @@
       <video class="video-player" id="remote-video" autoplay playsinline></video>
     </div>
     <div class="container local">
-      <video class="video-player" id="local-video" autoplay playsinline></video>
+      <video class="video-player" id="local-video" autoplay playsinline muted></video>
     </div>
     <div class="loader-container" id="loader-container">
       <div class="loader"></div>
@@ -49,26 +49,26 @@
       <div class="hint" data-i18n="invite-form-hint-id">
         Share the room id with your friend.
       </div>
-      <div 
-        class="hint color-bright-blue" 
-        id="copy-id" 
+      <div
+        class="hint color-bright-blue"
+        id="copy-id"
         data-i18n="invite-form-clipboard"
       >Copied to clipboard</div>
-      <input 
-        class="form-input text-input" 
+      <input
+        class="form-input text-input"
         type="text"
         name="id"
         value=""
         readonly
       >
       <div class="hint" data-i18n="invite-form-hint-url">Or share the room URL.</div>
-      <div 
-        class="hint color-bright-blue" 
+      <div
+        class="hint color-bright-blue"
         id="copy-url"
         data-i18n="invite-form-clipboard"
       >Copied to clipboard</div>
-      <input 
-        class="form-input text-input" 
+      <input
+        class="form-input text-input"
         type="text"
         name="url"
         value=""
@@ -76,12 +76,12 @@
       >
     </form>
   </div>
-  
+
   <script>
     const inviteForm = document.getElementById("invite-form");
     const inviteFormBtn = document.getElementById("invite-control");
     createFixedForm(inviteForm, inviteFormBtn);
-    
+
     const createCopyInput = (input, copyMessage) => {
       copyMessage.style.display = 'none';
       input.addEventListener('click', () => {
